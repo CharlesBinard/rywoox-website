@@ -1,5 +1,7 @@
 'use client'
 
+// TODO: integrate leaderboard
+
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 

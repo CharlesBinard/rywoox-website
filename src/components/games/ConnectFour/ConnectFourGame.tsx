@@ -1,3 +1,5 @@
+// TODO: integrate leaderboard
+
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 

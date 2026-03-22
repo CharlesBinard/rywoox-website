@@ -1,5 +1,7 @@
 'use client'
 
+// TODO: integrate leaderboard
+
 import { useEffect, useRef, useCallback, useState } from 'react'
 
 const WIDTH = 800

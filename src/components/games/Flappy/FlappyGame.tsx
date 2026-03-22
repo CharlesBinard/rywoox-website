@@ -1,5 +1,7 @@
 'use client'
 
+// TODO: integrate leaderboard
+
 import { useEffect, useRef, useState, useCallback } from 'react'
 
 const W = 400

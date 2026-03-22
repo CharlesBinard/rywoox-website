@@ -2,10 +2,13 @@
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { saveScore, getScores } from '@/lib/leaderboard'
 
 type Player = 'X' | 'O'
 type Cell = Player | null
 type Board = Cell[]
+
+const GAME_ID = 'tictactoe'
 
 const WIN_PATTERNS = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -65,6 +68,57 @@ const bestMove = (board: Board): number => {
   return move
 }
 
+const ScoreModal = ({ onClose }: { onClose: () => void }) => {
+  const scores = getScores(GAME_ID).slice(0, 10)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-dark-card border border-dark-border rounded-2xl p-6 w-80 max-w-full mx-4 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-black text-neon-cyan">🏆 Scores</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-white text-xl leading-none cursor-pointer"
+          >
+            ×
+          </button>
+        </div>
+
+        {scores.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center py-8">Aucun score encore. Jouez !</p>
+        ) : (
+          <ul className="space-y-2">
+            {scores.map((entry, i) => (
+              <li key={i} className="flex items-center gap-3 bg-dark-bg rounded-lg px-3 py-2">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                  ${i === 0 ? 'bg-yellow-400 text-black' : i === 1 ? 'bg-gray-300 text-black' : i === 2 ? 'bg-orange-400 text-black' : 'bg-dark-border text-gray-500'}`}>
+                  {i + 1}
+                </span>
+                <span className="flex-1 text-sm font-mono text-gray-300 truncate">
+                  {entry.name || 'Anonymous'}
+                </span>
+                <span className="text-neon-cyan font-black text-sm">{entry.score}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </motion.div>
+    </motion.div>
+  )
+}
+
 export const TicTacToeGame = () => {
   const [board, setBoard] = useState<Board>(Array(9).fill(null))
   const [human, setHuman] = useState<Player>('X')
@@ -73,6 +127,15 @@ export const TicTacToeGame = () => {
   const [winner, setWinner] = useState<Player | 'draw' | null>(null)
   const [winningPattern, setWinningPattern] = useState<number[]>([])
   const [started, setStarted] = useState(false)
+  const [showScores, setShowScores] = useState(false)
+
+  const handleGameOver = useCallback((w: Player | 'draw' | null) => {
+    if (w === human) {
+      saveScore(GAME_ID, 3)
+    } else if (w === 'draw') {
+      saveScore(GAME_ID, 1)
+    }
+  }, [human])
 
   const reset = useCallback((h: Player) => {
     setBoard(Array(9).fill(null))
@@ -96,15 +159,16 @@ export const TicTacToeGame = () => {
       setWinner(result.winner)
       setWinningPattern(result.pattern)
       setGameOver(true)
+      handleGameOver(result.winner)
       return
     }
     if (newBoard.every(c => c !== null)) {
       setWinner('draw')
       setGameOver(true)
+      handleGameOver('draw')
       return
     }
 
-    // AI move
     const aiMove = bestMove(newBoard)
     if (aiMove !== -1) {
       newBoard[aiMove] = human === 'X' ? 'O' : 'X'
@@ -114,14 +178,16 @@ export const TicTacToeGame = () => {
         setWinner(aiResult.winner)
         setWinningPattern(aiResult.pattern)
         setGameOver(true)
+        handleGameOver(aiResult.winner)
         return
       }
       if (newBoard.every(c => c !== null)) {
         setWinner('draw')
         setGameOver(true)
+        handleGameOver('draw')
       }
     }
-  }, [started, board, gameOver, current, human])
+  }, [started, board, gameOver, current, human, handleGameOver])
 
   const renderCell = (idx: number) => {
     const value = board[idx]
@@ -166,6 +232,10 @@ export const TicTacToeGame = () => {
 
   return (
     <div className="flex flex-col items-center gap-6">
+      <AnimatePresence>
+        {showScores && <ScoreModal onClose={() => setShowScores(false)} />}
+      </AnimatePresence>
+
       {!started && (
         <div className="flex flex-col items-center gap-4">
           <h2 className="text-xl font-bold text-gray-300">Choisis ton côté</h2>
@@ -208,23 +278,30 @@ export const TicTacToeGame = () => {
             {Array.from({ length: 9 }, (_, i) => renderCell(i))}
           </div>
 
-          {gameOver && (
+          <div className="flex gap-3">
+            {gameOver && (
+              <button
+                onClick={() => reset(human)}
+                className="px-8 py-3 rounded-xl bg-neon-cyan/20 border border-neon-cyan text-neon-cyan font-bold hover:bg-neon-cyan/30 transition-all cursor-pointer"
+              >
+                REJOUER
+              </button>
+            )}
+            {!gameOver && (
+              <button
+                onClick={() => reset(human)}
+                className="px-6 py-2 rounded-xl glass border border-dark-border text-gray-500 text-sm hover:text-gray-300 hover:border-gray-600 transition-all cursor-pointer"
+              >
+                Recommencer
+              </button>
+            )}
             <button
-              onClick={() => reset(human)}
-              className="px-8 py-3 rounded-xl bg-neon-cyan/20 border border-neon-cyan text-neon-cyan font-bold hover:bg-neon-cyan/30 transition-all cursor-pointer"
+              onClick={() => setShowScores(true)}
+              className="px-6 py-2 rounded-xl bg-dark-card border border-dark-border text-gray-400 text-sm hover:text-neon-cyan hover:border-neon-cyan/40 transition-all cursor-pointer"
             >
-              REJOUER
+              🏆 Scores
             </button>
-          )}
-
-          {!gameOver && (
-            <button
-              onClick={() => reset(human)}
-              className="px-6 py-2 rounded-xl glass border border-dark-border text-gray-500 text-sm hover:text-gray-300 hover:border-gray-600 transition-all cursor-pointer"
-            >
-              Recommencer
-            </button>
-          )}
+          </div>
         </>
       )}
     </div>
