@@ -1,4 +1,4 @@
-import { motion, type HTMLMotionProps } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost'
 type ButtonSize = 'sm' | 'md' | 'lg'
@@ -15,10 +15,15 @@ const sizeStyles: Record<ButtonSize, string> = {
   lg: 'px-8 py-4 text-lg',
 }
 
-interface MotionButtonProps extends HTMLMotionProps<'button'> {
+interface ButtonProps {
   variant?: ButtonVariant
   size?: ButtonSize
   isLoading?: boolean
+  disabled?: boolean
+  className?: string
+  children?: React.ReactNode
+  type?: 'button' | 'submit' | 'reset'
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
 }
 
 export const Button = ({
@@ -28,10 +33,13 @@ export const Button = ({
   isLoading = false,
   disabled,
   className = '',
-  ...props
-}: MotionButtonProps) => {
+  type = 'button',
+  onClick,
+}: ButtonProps) => {
   return (
     <motion.button
+      type={type}
+      onClick={onClick}
       whileHover={{ scale: disabled || isLoading ? 1 : 1.05 }}
       whileTap={{ scale: disabled || isLoading ? 1 : 0.95 }}
       disabled={disabled || isLoading}
@@ -42,7 +50,6 @@ export const Button = ({
         ${sizeStyles[size]}
         ${className}
       `}
-      {...props}
     >
       {isLoading ? '...' : children}
     </motion.button>
