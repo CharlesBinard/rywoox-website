@@ -207,6 +207,11 @@ export const SnakeGame = () => {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
+      const gameKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D']
+      if (gameKeys.includes(e.key)) {
+        e.preventDefault()
+      }
+
       if (!isPlaying && e.key !== ' ' && e.key !== 'Enter') return
       if (gameOver) return
 
@@ -218,7 +223,6 @@ export const SnakeGame = () => {
 
       const newDir = dirMap[e.key]
       if (!newDir) return
-      e.preventDefault()
 
       const opposites: Record<string, string> = {
         UP: 'DOWN', DOWN: 'UP', LEFT: 'RIGHT', RIGHT: 'LEFT',

@@ -9,8 +9,8 @@ const BIRD_R = 14
 const PIPE_W = 60
 const PIPE_GAP = 160
 const PIPE_SPEED = 2.5
-const GRAVITY = 0.45
-const JUMP = -7.5
+const GRAVITY = 0.35
+const JUMP = -8.5
 const PIPE_SPAWN = 100
 
 type Pipe = { x: number; top: number; bottom: number; scored: boolean }
@@ -19,29 +19,52 @@ export const FlappyGame = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [score, setScore] = useState(0)
   const [highScore, setHighScore] = useState(0)
-  const [gameState, setGameState] = useState<'idle' | 'playing' | 'dead'>('idle')
+  const [gameState, setGameState] = useState<'idle' | 'countdown' | 'playing' | 'dead'>('idle')
+  const [countdown, setCountdown] = useState(3)
 
   const birdYRef = useRef(H / 3)
   const velRef = useRef(0)
   const pipesRef = useRef<Pipe[]>([])
   const frameRef = useRef(0)
   const loopRef = useRef<number | null>(null)
+  const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const reset = useCallback(() => {
+    if (countdownTimerRef.current) { clearInterval(countdownTimerRef.current); countdownTimerRef.current = null }
     birdYRef.current = H / 3
     velRef.current = 0
     pipesRef.current = []
     frameRef.current = 0
     setScore(0)
+    setCountdown(3)
   }, [])
 
   const start = useCallback(() => {
     reset()
-    setGameState('playing')
+    setCountdown(3)
+    setGameState('countdown')
+
+    if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
+    countdownTimerRef.current = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(countdownTimerRef.current!)
+          countdownTimerRef.current = null
+          setGameState('playing')
+          return 0
+        }
+        return c - 1
+      })
+    }, 1000)
   }, [reset])
 
   const jump = useCallback(() => {
     if (gameState === 'idle' || gameState === 'dead') { start(); return }
+    if (gameState === 'countdown') {
+      if (countdownTimerRef.current) { clearInterval(countdownTimerRef.current); countdownTimerRef.current = null }
+      setGameState('playing')
+      return
+    }
     velRef.current = JUMP
   }, [gameState, start])
 
@@ -56,14 +79,24 @@ export const FlappyGame = () => {
     return () => window.removeEventListener('keydown', handleKey)
   }, [jump])
 
+  // Cleanup countdown timer on unmount
   useEffect(() => {
-    if (gameState !== 'playing') {
+    return () => {
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (gameState !== 'playing' && gameState !== 'countdown') {
       if (loopRef.current) cancelAnimationFrame(loopRef.current)
       return
     }
 
     const update = () => {
       frameRef.current++
+
+      // Skip physics during countdown
+      if (gameState === 'countdown') return
 
       // Bird physics
       velRef.current += GRAVITY
@@ -230,6 +263,13 @@ export const FlappyGame = () => {
             >
               JOUER
             </button>
+          </div>
+        )}
+
+        {gameState === 'countdown' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-dark-bg/60 rounded-xl">
+            <div className="text-8xl font-bold text-yellow-400 animate-pulse">{countdown}</div>
+            <div className="text-gray-400 text-sm mt-4">Prépare-toi !</div>
           </div>
         )}
 

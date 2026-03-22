@@ -251,6 +251,10 @@ export const TetrisGame = () => {
     if (!started || paused || gameOver) return
 
     const handleKey = (e: KeyboardEvent) => {
+      const gameKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D']
+      if (gameKeys.includes(e.key)) {
+        e.preventDefault()
+      }
       keysRef.current.add(e.key)
       switch (e.key) {
         case 'ArrowLeft': case 'a': case 'A': move(-1); break
