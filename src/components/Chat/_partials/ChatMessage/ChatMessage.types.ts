@@ -3,5 +3,4 @@ export interface ChatMessageProps {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
-  index: number
 }

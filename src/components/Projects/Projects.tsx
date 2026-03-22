@@ -10,7 +10,7 @@ export const Projects = () => {
     <motion.div
       initial={{ opacity: 0, y: 60 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-100px' }}
+      viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="max-w-4xl mx-auto"
     >
@@ -32,16 +32,16 @@ export const Projects = () => {
 
       {!loading && !error && (
         <div className="flex flex-col gap-6">
-          {repos.map((repo, index) => (
+          {repos.map((repo) => (
             <motion.a
               key={repo.id}
               href={repo.html_url}
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, x: -40 }}
+              initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.5, delay: index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
               whileHover={{ x: 8, scale: 1.01 }}
             >
               <GlassCard glowBorder className="block group h-full">

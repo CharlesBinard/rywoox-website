@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { Header } from '@/components/Header'
 import { Hero } from '@/components/Hero'
 import { Chat } from '@/components/Chat'
@@ -11,24 +11,7 @@ import { SECTIONS, type SectionId } from '@/constants/routes.constants'
 function App() {
   const [activeSection, setActiveSection] = useState<SectionId>(SECTIONS.HERO)
   const { messages, isLoading, sendMessage, messagesEndRef } = useChat()
-  const chatMessageRef = useRef(messages)
 
-  // Keep ref updated with latest messages
-  useEffect(() => {
-    chatMessageRef.current = messages
-  }, [messages])
-
-  // Listen for chat:send events from ChatInput
-  useEffect(() => {
-    const handleChatSend = (e: CustomEvent<{ message: string }>) => {
-      sendMessage(e.detail.message)
-    }
-
-    window.addEventListener('chat:send', handleChatSend as EventListener)
-    return () => {
-      window.removeEventListener('chat:send', handleChatSend as EventListener)
-    }
-  }, [sendMessage])
 
   const scrollToSection = (sectionId: SectionId) => {
     setActiveSection(sectionId)
@@ -47,7 +30,7 @@ function App() {
           <Hero onStartChat={() => scrollToSection(SECTIONS.CHAT)} />
         </section>
 
-        <section id={SECTIONS.CHAT} className="min-h-screen py-16">
+        <section id={SECTIONS.CHAT} className="py-16">
           <Chat
             messages={messages}
             isLoading={isLoading}

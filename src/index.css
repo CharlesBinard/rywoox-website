@@ -10,7 +10,19 @@
 }
 
 html {
-  
+  scroll-behavior: smooth;
+}
+
+body {
+  scroll-behavior: smooth;
+}
+
+/* Prevent browser default scroll-into-view when focusing inputs inside scrollable containers */
+input:focus,
+textarea:focus,
+[contenteditable]:focus {
+  scroll-margin-top: 0;
+  /* Let the input stay where it is, don't force page scroll */
 }
 
 body {

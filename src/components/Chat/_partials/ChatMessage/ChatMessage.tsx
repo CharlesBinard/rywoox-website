@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import type { ChatMessageProps } from './ChatMessage.types'
 
-export const ChatMessage = ({ role, content, timestamp, index }: ChatMessageProps) => {
+export const ChatMessage = ({ role, content, timestamp }: ChatMessageProps) => {
   const isUser = role === 'user'
 
   const copyToClipboard = () => {
@@ -10,9 +10,9 @@ export const ChatMessage = ({ role, content, timestamp, index }: ChatMessageProp
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
       className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       <div
@@ -26,7 +26,7 @@ export const ChatMessage = ({ role, content, timestamp, index }: ChatMessageProp
         `}
       >
         <p className="whitespace-pre-wrap break-words">{content}</p>
-        
+
         <div
           className={`
             flex items-center justify-between mt-2 gap-4 text-xs
