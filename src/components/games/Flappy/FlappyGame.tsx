@@ -5,12 +5,12 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 const W = 400
 const H = 600
 const BIRD_X = 60
-const BIRD_R = 14
+const BIRD_R = 10
 const PIPE_W = 60
 const PIPE_GAP = 160
 const PIPE_SPEED = 2.5
-const GRAVITY = 0.35
-const JUMP = -8.5
+const GRAVITY = 0.18
+const JUMP = -7.0
 const PIPE_SPAWN = 100
 
 type Pipe = { x: number; top: number; bottom: number; scored: boolean }
