@@ -9,7 +9,6 @@ dist
 Dockerfile
 docker-compose.yml
 docker-compose.*.yml
-nginx.conf
 *.md
 *.lock
 *.log
