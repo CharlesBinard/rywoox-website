@@ -1,28 +1,41 @@
+'use client';
+
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import {
-  ConnectFourGame,
-  FlappyGame,
-  MemoryGame,
-  NumberMergeGame,
-  PongGame,
-  SnakeGame,
-  TetrisGame,
-  TicTacToeGame,
-} from '@/components/games';
+import { lazy, Suspense } from 'react';
 import { BackButton } from '@/components/ui';
 import { GAMES } from '@/data/games';
 import type { GameId } from '@/types/games';
 
-const gameComponents: Record<GameId, React.ComponentType> = {
-  snake: SnakeGame,
-  pong: PongGame,
-  memory: MemoryGame,
-  tetris: TetrisGame,
-  flappy: FlappyGame,
-  tictactoe: TicTacToeGame,
-  connectfour: ConnectFourGame,
-  numbermerge: NumberMergeGame,
+const gameComponents: Record<GameId, React.LazyExoticComponent<React.ComponentType>> = {
+  snake: lazy(() =>
+    import('@/components/games/Snake/SnakeGame').then((m) => ({ default: m.SnakeGame }))
+  ),
+  pong: lazy(() =>
+    import('@/components/games/Pong/PongGame').then((m) => ({ default: m.PongGame }))
+  ),
+  memory: lazy(() =>
+    import('@/components/games/Memory/MemoryGame').then((m) => ({ default: m.MemoryGame }))
+  ),
+  tetris: lazy(() =>
+    import('@/components/games/Tetris/TetrisGame').then((m) => ({ default: m.TetrisGame }))
+  ),
+  flappy: lazy(() =>
+    import('@/components/games/Flappy/FlappyGame').then((m) => ({ default: m.FlappyGame }))
+  ),
+  tictactoe: lazy(() =>
+    import('@/components/games/TicTacToe/TicTacToeGame').then((m) => ({ default: m.TicTacToeGame }))
+  ),
+  connectfour: lazy(() =>
+    import('@/components/games/ConnectFour/ConnectFourGame').then((m) => ({
+      default: m.ConnectFourGame,
+    }))
+  ),
+  numbermerge: lazy(() =>
+    import('@/components/games/NumberMerge/NumberMergeGame').then((m) => ({
+      default: m.NumberMergeGame,
+    }))
+  ),
 };
 
 const colorMap: Record<string, string> = {
@@ -34,15 +47,22 @@ const colorMap: Record<string, string> = {
   orange: 'text-orange-400',
 };
 
+const GameFallback = () => (
+  <div className="flex flex-col items-center justify-center gap-4 py-12">
+    <div className="w-12 h-12 border-4 border-neon-cyan/30 border-t-neon-cyan rounded-full animate-spin" />
+    <p className="text-gray-500 text-sm">Chargement...</p>
+  </div>
+);
+
 export const GameView = () => {
   const { gameId } = useParams({ from: '/game/$gameId' });
   const navigate = useNavigate();
 
   const game = GAMES.find((g) => g.id === gameId);
-  const GameComponent = gameComponents[gameId as GameId];
+  const LazyGameComponent = gameId ? gameComponents[gameId as GameId] : null;
   const colorClass = colorMap[game?.hue ?? 'cyan'] || 'neon-cyan';
 
-  if (!game || !GameComponent) {
+  if (!game || !LazyGameComponent) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <div className="text-4xl">😕</div>
@@ -68,7 +88,9 @@ export const GameView = () => {
           <p className="text-gray-500 text-sm">{game.description}</p>
         </div>
 
-        <GameComponent />
+        <Suspense fallback={<GameFallback />}>
+          <LazyGameComponent />
+        </Suspense>
 
         <BackButton onClick={() => navigate({ to: '/' })} />
       </div>

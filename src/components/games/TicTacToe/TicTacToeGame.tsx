@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useState } from 'react';
-import { getScores, saveScore } from '@/lib/leaderboard';
+import { useGameStore } from '@/stores/gameStore';
 
 type Player = 'X' | 'O';
 type Cell = Player | null;
@@ -77,7 +77,7 @@ const bestMove = (board: Board): number => {
 };
 
 const ScoreModal = ({ onClose }: { onClose: () => void }) => {
-  const scores = getScores(GAME_ID).slice(0, 10);
+  const scores = useGameStore((s) => s.leaderboard[GAME_ID] ?? []).slice(0, 10);
 
   return (
     <motion.div
@@ -142,6 +142,8 @@ export const TicTacToeGame = () => {
   const [started, setStarted] = useState(false);
   const [showScores, setShowScores] = useState(false);
 
+  const saveScore = useGameStore((s) => s.saveScore);
+
   const handleGameOver = useCallback(
     (w: Player | 'draw' | null) => {
       if (w === human) {
@@ -150,7 +152,7 @@ export const TicTacToeGame = () => {
         saveScore(GAME_ID, 1);
       }
     },
-    [human]
+    [human, saveScore]
   );
 
   const reset = useCallback((h: Player) => {
