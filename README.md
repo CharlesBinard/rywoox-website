@@ -1,134 +1,103 @@
-# Rywoox.com 🚀
+# Rywoox
 
-Personal website with a futuristic AI chat interface powered by Gemini 3.1 Flash.
+> Hub de jeux rétro personalisé — [https://rywoox.com](https://rywoox.com)
 
-![Rywoox](https://img.shields.io/badge/Rywoox-Fullstack%20Developer-blue)
+[![CI](https://github.com/CharlesBinard/rywoox-website/actions/workflows/ci.yml/badge.svg)](https://github.com/CharlesBinard/rywoox-website/actions/workflows/ci.yml)
+[![Deploy](https://github.com/CharlesBinard/rywoox-website/actions/workflows/deploy.yml/badge.svg)](https://github.com/CharlesBinard/rywoox-website/actions/workflows/deploy.yml)
 
-## Features
+---
 
-- 💬 **AI Chat** - Ask questions about Charles Binard (Rywoox) and his projects
-- 🎨 **Futuristic UI** - Dark theme with neon accents and smooth animations
-- 📂 **GitHub Integration** - Automatically fetches public repositories
-- ⚡ **Fast** - Built with React 19 + Vite + Bun
-- 📱 **Responsive** - Works on all devices
+## 🎮 Jeux Disponibles
 
-## Tech Stack
+| Jeu | Description |
+|-----|-------------|
+| 🎮 **Connect Four** | Classique jeu de Puissance 4 contre l'IA — aligne 4 pions pour gagner |
+| 🐦 **Flappy** | Bird qui évite les tuyaux — un classique infini |
+| 🧠 **Memory** | Retrouve les paires de cartes — entraîne ta mémoire |
+| 🏓 **Pong** | Le jeu de ping-pong originel — 1v1 ou vs IA |
+| 🐍 **Snake** | Mange, grandis, évite de te mordre la queue |
+| 🧱 **Tetris** | Blocs qui tombent, lignes qui disparaissent — le grand classique |
+| ❌⭕ **TicTacToe** | Morpion au tour par tour — simple mais efficace |
 
-- React 19
-- TypeScript
-- Vite
-- TailwindCSS v4
-- Framer Motion
-- Gemini 3.1 Flash API
-- Vercel AI SDK
+Chaque jeu intègre des features IA via **Gemini AI** (via `@ai-sdk/google`).
 
-## Setup
+---
 
-1. Clone the repository
-2. Install dependencies:
+## 🛠 Stack
+
+- ⚡ **Vite** + **React 19**
+- 🎨 **Tailwind CSS 4**
+- 🔀 **TanStack Router**
+- 🦾 **TypeScript**
+- ✨ **Framer Motion**
+- 🤖 **Gemini AI** (`@ai-sdk/google`)
+
+---
+
+## 🚀 Installation
 
 ```bash
+git clone https://github.com/CharlesBinard/rywoox-website.git
+cd rywoox-website
 bun install
+bun run dev
 ```
 
-3. Create a `.env` file with your Gemini API key:
+> Le fichier `.env.production.example` contient les variables nécessaires pour la prod.
 
-```env
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-```
+---
 
-Get your Gemini API key at: https://aistudio.google.com/app/apikey
+## 🐳 Déploiement
 
-4. Run the development server:
-
-```bash
-bun dev
-```
-
-5. Build for production:
-
-```bash
-bun build
-```
-
-## Project Structure
-
-```
-src/
-├── components/
-│   ├── About.tsx       # About section
-│   ├── Chat.tsx       # AI chat interface
-│   ├── Hero.tsx       # Hero section
-│   ├── Navigation.tsx # Navigation bar
-│   ├── Projects.tsx   # GitHub repos display
-│   └── Skills.tsx     # Tech stack display
-├── App.tsx            # Main app component
-├── main.tsx           # Entry point
-└── index.css          # Global styles + Tailwind
-```
-
-## Deploy
-
-This project is optimized for deployment on Vercel:
-
-```bash
-bun vercel
-```
-
-Or set the `VITE_GEMINI_API_KEY` environment variable in your Vercel project settings.
-
-## Deploy with Docker
-
-### Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-
-### Quick Start
-
-1. Copy the environment template:
+### Docker
 
 ```bash
 cp .env.production.example .env
+# Édite .env et ajoute ta clé API Gemini
+docker compose up -d --build
 ```
 
-2. Edit `.env` and set your Gemini API key:
+Le conteneur expose le site sur **port 3000** et sert les assets statiques via **nginx**.
 
-```env
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-```
+---
 
-3. Build and start the container:
+## ⚙️ Development
 
 ```bash
-docker compose up -d --build
+bun run dev      # dev server
+bun run build    # production build
+bun run preview  # preview production build
+bun run lint     # lint avec Biome
+bun run format   # format avec Biome
+bun run check    # lint + format check
+bun run typecheck # vérification TypeScript
 ```
 
-4. The site will be available at `http://localhost:3000`
+---
 
-### Commands
+## 🔄 CI/CD
 
-```bash
-# Start (background)
-docker compose up -d --build
+Push sur n'importe quelle branche → **lint → typecheck → build**
 
-# Stop
-docker compose down
+Push sur `main` → build & push de l'image Docker vers **GHCR** (`ghcr.io/CharlesBinard/rywoox-website`)
 
-# Rebuild after code changes
-docker compose up -d --build
+---
 
-# View logs
-docker compose logs -f
-```
+## 📦 Fonctionnalités
 
-### Production Notes
+- 📱 **PWA** installable — Service Worker + manifest.json
+- 🏆 **Leaderboard local** — scores sauvegardés dans localStorage
+- 🌙 **UI dark/neon** — theme retro avec animations fluides via Framer Motion
+- 🔄 **Routing** — navigation SPA avec TanStack Router
 
-- The container runs nginx serving the built static assets.
-- React Router is configured with SPA fallback (`try_files $uri $uri/ /index.html`) so client-side routing works correctly.
-- The container restarts automatically (`unless-stopped`) on boot.
-- For HTTPS, place behind a reverse proxy (Traefik, Caddy, nginx-proxy) with LetsEncrypt.
+---
 
-## License
+## 🤝 Contributing
+
+Les contributions sont les bienvenues ! Ouvre une PR.
+
+---
+
+## 📜 License
 
 MIT
