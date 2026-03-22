@@ -57,7 +57,7 @@ export const Skills = () => {
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: '-50px' }}
+        viewport={{ once: true }}
         className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
       >
         {skills.map((skill) => (

@@ -9,11 +9,14 @@ export const useChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Use instant scroll to avoid conflicts with CSS/Framer Motion
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
   }, [])
 
   useEffect(() => {
-    scrollToBottom()
+    if (messages.length > 0) {
+      scrollToBottom()
+    }
   }, [messages, scrollToBottom])
 
   const sendMessage = useCallback(async (content: string) => {
