@@ -8,7 +8,7 @@ function App() {
       <Header />
       <RouterProvider router={router} />
       <footer className="py-8 text-center text-gray-600 text-sm font-mono">
-        <p>6 mini jeux · React + Canvas · Rywoox</p>
+        <p></p>
       </footer>
     </div>
   );
