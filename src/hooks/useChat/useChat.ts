@@ -76,7 +76,7 @@ export const useChat = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [isLoading, scrollToBottom])
+  }, [isLoading])
 
   const clearMessages = useCallback(() => {
     setMessages([])
