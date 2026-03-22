@@ -1,1 +1,1 @@
-export { TetrisGame } from './TetrisGame'
+export { TetrisGame } from './TetrisGame';

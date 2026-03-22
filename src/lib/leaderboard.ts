@@ -1,24 +1,24 @@
 // TODO: integrate leaderboard
 
 export interface ScoreEntry {
-  score: number
-  date: string
-  name?: string
+  score: number;
+  date: string;
+  name?: string;
 }
 
-const MAX_SCORES = 100
+const MAX_SCORES = 100;
 
 /**
  * Save a score for a given game to localStorage.
  */
 export function saveScore(gameId: string, score: number, playerName?: string): void {
   try {
-    const raw = localStorage.getItem(`leaderboard_${gameId}`)
-    const scores: ScoreEntry[] = raw ? JSON.parse(raw) : []
-    scores.push({ score, date: new Date().toISOString(), name: playerName })
+    const raw = localStorage.getItem(`leaderboard_${gameId}`);
+    const scores: ScoreEntry[] = raw ? JSON.parse(raw) : [];
+    scores.push({ score, date: new Date().toISOString(), name: playerName });
     // Keep only the last MAX_SCORES to avoid unbounded growth
-    const trimmed = scores.slice(-MAX_SCORES)
-    localStorage.setItem(`leaderboard_${gameId}`, JSON.stringify(trimmed))
+    const trimmed = scores.slice(-MAX_SCORES);
+    localStorage.setItem(`leaderboard_${gameId}`, JSON.stringify(trimmed));
   } catch {
     // localStorage unavailable — silently fail
   }
@@ -29,12 +29,12 @@ export function saveScore(gameId: string, score: number, playerName?: string): v
  */
 export function getScores(gameId: string): ScoreEntry[] {
   try {
-    const raw = localStorage.getItem(`leaderboard_${gameId}`)
-    if (!raw) return []
-    const scores: ScoreEntry[] = JSON.parse(raw)
-    return scores.sort((a, b) => b.score - a.score)
+    const raw = localStorage.getItem(`leaderboard_${gameId}`);
+    if (!raw) return [];
+    const scores: ScoreEntry[] = JSON.parse(raw);
+    return scores.sort((a, b) => b.score - a.score);
   } catch {
-    return []
+    return [];
   }
 }
 
@@ -43,7 +43,7 @@ export function getScores(gameId: string): ScoreEntry[] {
  */
 export function clearScores(gameId: string): void {
   try {
-    localStorage.removeItem(`leaderboard_${gameId}`)
+    localStorage.removeItem(`leaderboard_${gameId}`);
   } catch {
     // silently fail
   }

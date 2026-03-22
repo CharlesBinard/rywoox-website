@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
 interface BackButtonProps {
-  onClick: () => void
+  onClick: () => void;
 }
 
 export const BackButton = ({ onClick }: BackButtonProps) => {
@@ -18,5 +18,5 @@ export const BackButton = ({ onClick }: BackButtonProps) => {
       <span className="text-lg">←</span>
       <span className="text-sm font-medium">Retour</span>
     </motion.button>
-  )
-}
+  );
+};

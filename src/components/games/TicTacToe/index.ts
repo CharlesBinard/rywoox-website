@@ -1,1 +1,1 @@
-export { TicTacToeGame } from './TicTacToeGame'
+export { TicTacToeGame } from './TicTacToeGame';

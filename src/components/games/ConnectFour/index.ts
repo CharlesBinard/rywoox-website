@@ -1,1 +1,1 @@
-export { ConnectFourGame } from './ConnectFourGame'
+export { ConnectFourGame } from './ConnectFourGame';

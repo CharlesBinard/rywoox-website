@@ -1,9 +1,17 @@
-import { motion } from 'framer-motion'
-import { BackButton } from '@/components/ui'
-import { SnakeGame, PongGame, MemoryGame, TetrisGame, FlappyGame, TicTacToeGame, ConnectFourGame } from '@/components/games'
-import { useParams, useNavigate } from '@tanstack/react-router'
-import { GAMES } from '@/data/games'
-import type { GameId } from '@/types/games'
+import { useNavigate, useParams } from '@tanstack/react-router';
+import { motion } from 'framer-motion';
+import {
+  ConnectFourGame,
+  FlappyGame,
+  MemoryGame,
+  PongGame,
+  SnakeGame,
+  TetrisGame,
+  TicTacToeGame,
+} from '@/components/games';
+import { BackButton } from '@/components/ui';
+import { GAMES } from '@/data/games';
+import type { GameId } from '@/types/games';
 
 const gameComponents: Record<GameId, React.ComponentType> = {
   snake: SnakeGame,
@@ -13,7 +21,7 @@ const gameComponents: Record<GameId, React.ComponentType> = {
   flappy: FlappyGame,
   tictactoe: TicTacToeGame,
   connectfour: ConnectFourGame,
-}
+};
 
 const colorMap: Record<string, string> = {
   cyan: 'neon-cyan',
@@ -22,15 +30,15 @@ const colorMap: Record<string, string> = {
   green: 'text-green-400',
   yellow: 'text-yellow-400',
   orange: 'text-orange-400',
-}
+};
 
 export const GameView = () => {
-  const { gameId } = useParams({ from: '/game/$gameId' })
-  const navigate = useNavigate()
+  const { gameId } = useParams({ from: '/game/$gameId' });
+  const navigate = useNavigate();
 
-  const game = GAMES.find(g => g.id === gameId)
-  const GameComponent = gameComponents[gameId as GameId]
-  const colorClass = colorMap[game?.hue ?? 'cyan'] || 'neon-cyan'
+  const game = GAMES.find((g) => g.id === gameId);
+  const GameComponent = gameComponents[gameId as GameId];
+  const colorClass = colorMap[game?.hue ?? 'cyan'] || 'neon-cyan';
 
   if (!game || !GameComponent) {
     return (
@@ -39,7 +47,7 @@ export const GameView = () => {
         <p className="text-gray-400">Jeu introuvable</p>
         <BackButton onClick={() => navigate({ to: '/' })} />
       </div>
-    )
+    );
   }
 
   return (
@@ -63,5 +71,5 @@ export const GameView = () => {
         <BackButton onClick={() => navigate({ to: '/' })} />
       </div>
     </motion.div>
-  )
-}
+  );
+};

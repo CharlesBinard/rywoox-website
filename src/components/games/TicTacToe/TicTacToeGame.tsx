@@ -1,75 +1,83 @@
-'use client'
+'use client';
 
-import { useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { saveScore, getScores } from '@/lib/leaderboard'
+import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useState } from 'react';
+import { getScores, saveScore } from '@/lib/leaderboard';
 
-type Player = 'X' | 'O'
-type Cell = Player | null
-type Board = Cell[]
+type Player = 'X' | 'O';
+type Cell = Player | null;
+type Board = Cell[];
 
-const GAME_ID = 'tictactoe'
+const GAME_ID = 'tictactoe';
 
 const WIN_PATTERNS = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8],
-  [0, 3, 6], [1, 4, 7], [2, 5, 8],
-  [0, 4, 8], [2, 4, 6],
-]
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+];
 
 const checkWinner = (board: Board): { winner: Player; pattern: number[] } | null => {
   for (const pattern of WIN_PATTERNS) {
-    const [a, b, c] = pattern
+    const [a, b, c] = pattern;
     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-      return { winner: board[a]!, pattern }
+      return { winner: board[a]!, pattern };
     }
   }
-  return null
-}
+  return null;
+};
 
 const minimax = (board: Board, depth: number, isMax: boolean): number => {
-  const result = checkWinner(board)
-  if (result) return result.winner === 'O' ? 10 - depth : depth - 10
-  if (board.every(c => c !== null)) return 0
+  const result = checkWinner(board);
+  if (result) return result.winner === 'O' ? 10 - depth : depth - 10;
+  if (board.every((c) => c !== null)) return 0;
 
   if (isMax) {
-    let best = -Infinity
+    let best = -Infinity;
     for (let i = 0; i < 9; i++) {
       if (!board[i]) {
-        board[i] = 'O'
-        best = Math.max(best, minimax(board, depth + 1, false))
-        board[i] = null
+        board[i] = 'O';
+        best = Math.max(best, minimax(board, depth + 1, false));
+        board[i] = null;
       }
     }
-    return best
+    return best;
   } else {
-    let best = Infinity
+    let best = Infinity;
     for (let i = 0; i < 9; i++) {
       if (!board[i]) {
-        board[i] = 'X'
-        best = Math.min(best, minimax(board, depth + 1, true))
-        board[i] = null
+        board[i] = 'X';
+        best = Math.min(best, minimax(board, depth + 1, true));
+        board[i] = null;
       }
     }
-    return best
+    return best;
   }
-}
+};
 
 const bestMove = (board: Board): number => {
-  let best = -Infinity
-  let move = -1
+  let best = -Infinity;
+  let move = -1;
   for (let i = 0; i < 9; i++) {
     if (!board[i]) {
-      board[i] = 'O'
-      const score = minimax(board, 0, false)
-      board[i] = null
-      if (score > best) { best = score; move = i }
+      board[i] = 'O';
+      const score = minimax(board, 0, false);
+      board[i] = null;
+      if (score > best) {
+        best = score;
+        move = i;
+      }
     }
   }
-  return move
-}
+  return move;
+};
 
 const ScoreModal = ({ onClose }: { onClose: () => void }) => {
-  const scores = getScores(GAME_ID).slice(0, 10)
+  const scores = getScores(GAME_ID).slice(0, 10);
 
   return (
     <motion.div
@@ -102,8 +110,10 @@ const ScoreModal = ({ onClose }: { onClose: () => void }) => {
           <ul className="space-y-2">
             {scores.map((entry, i) => (
               <li key={i} className="flex items-center gap-3 bg-dark-bg rounded-lg px-3 py-2">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
-                  ${i === 0 ? 'bg-yellow-400 text-black' : i === 1 ? 'bg-gray-300 text-black' : i === 2 ? 'bg-orange-400 text-black' : 'bg-dark-border text-gray-500'}`}>
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                  ${i === 0 ? 'bg-yellow-400 text-black' : i === 1 ? 'bg-gray-300 text-black' : i === 2 ? 'bg-orange-400 text-black' : 'bg-dark-border text-gray-500'}`}
+                >
                   {i + 1}
                 </span>
                 <span className="flex-1 text-sm font-mono text-gray-300 truncate">
@@ -116,82 +126,88 @@ const ScoreModal = ({ onClose }: { onClose: () => void }) => {
         )}
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};
 
 export const TicTacToeGame = () => {
-  const [board, setBoard] = useState<Board>(Array(9).fill(null))
-  const [human, setHuman] = useState<Player>('X')
-  const [current, setCurrent] = useState<Player>('X')
-  const [gameOver, setGameOver] = useState(false)
-  const [winner, setWinner] = useState<Player | 'draw' | null>(null)
-  const [winningPattern, setWinningPattern] = useState<number[]>([])
-  const [started, setStarted] = useState(false)
-  const [showScores, setShowScores] = useState(false)
+  const [board, setBoard] = useState<Board>(Array(9).fill(null));
+  const [human, setHuman] = useState<Player>('X');
+  const [current, setCurrent] = useState<Player>('X');
+  const [gameOver, setGameOver] = useState(false);
+  const [winner, setWinner] = useState<Player | 'draw' | null>(null);
+  const [winningPattern, setWinningPattern] = useState<number[]>([]);
+  const [started, setStarted] = useState(false);
+  const [showScores, setShowScores] = useState(false);
 
-  const handleGameOver = useCallback((w: Player | 'draw' | null) => {
-    if (w === human) {
-      saveScore(GAME_ID, 3)
-    } else if (w === 'draw') {
-      saveScore(GAME_ID, 1)
-    }
-  }, [human])
+  const handleGameOver = useCallback(
+    (w: Player | 'draw' | null) => {
+      if (w === human) {
+        saveScore(GAME_ID, 3);
+      } else if (w === 'draw') {
+        saveScore(GAME_ID, 1);
+      }
+    },
+    [human]
+  );
 
   const reset = useCallback((h: Player) => {
-    setBoard(Array(9).fill(null))
-    setHuman(h)
-    setCurrent('X')
-    setGameOver(false)
-    setWinner(null)
-    setWinningPattern([])
-    setStarted(true)
-  }, [])
+    setBoard(Array(9).fill(null));
+    setHuman(h);
+    setCurrent('X');
+    setGameOver(false);
+    setWinner(null);
+    setWinningPattern([]);
+    setStarted(true);
+  }, []);
 
-  const handleCell = useCallback((idx: number) => {
-    if (!started || board[idx] || gameOver || current !== human) return
+  const handleCell = useCallback(
+    (idx: number) => {
+      if (!started || board[idx] || gameOver || current !== human) return;
 
-    const newBoard = [...board]
-    newBoard[idx] = human
-    setBoard(newBoard)
+      const newBoard = [...board];
+      newBoard[idx] = human;
+      setBoard(newBoard);
 
-    const result = checkWinner(newBoard)
-    if (result) {
-      setWinner(result.winner)
-      setWinningPattern(result.pattern)
-      setGameOver(true)
-      handleGameOver(result.winner)
-      return
-    }
-    if (newBoard.every(c => c !== null)) {
-      setWinner('draw')
-      setGameOver(true)
-      handleGameOver('draw')
-      return
-    }
-
-    const aiMove = bestMove(newBoard)
-    if (aiMove !== -1) {
-      newBoard[aiMove] = human === 'X' ? 'O' : 'X'
-      setBoard([...newBoard])
-      const aiResult = checkWinner(newBoard)
-      if (aiResult) {
-        setWinner(aiResult.winner)
-        setWinningPattern(aiResult.pattern)
-        setGameOver(true)
-        handleGameOver(aiResult.winner)
-        return
+      const result = checkWinner(newBoard);
+      if (result) {
+        setWinner(result.winner);
+        setWinningPattern(result.pattern);
+        setGameOver(true);
+        handleGameOver(result.winner);
+        return;
       }
-      if (newBoard.every(c => c !== null)) {
-        setWinner('draw')
-        setGameOver(true)
-        handleGameOver('draw')
+      if (newBoard.every((c) => c !== null)) {
+        setWinner('draw');
+        setGameOver(true);
+        handleGameOver('draw');
+        return;
       }
-    }
-  }, [started, board, gameOver, current, human, handleGameOver])
+
+      const aiMove = bestMove(newBoard);
+      if (aiMove !== -1) {
+        newBoard[aiMove] = human === 'X' ? 'O' : 'X';
+        setBoard([...newBoard]);
+        const aiResult = checkWinner(newBoard);
+        if (aiResult) {
+          setWinner(aiResult.winner);
+          setWinningPattern(aiResult.pattern);
+          setGameOver(true);
+          handleGameOver(aiResult.winner);
+          return;
+        }
+        if (newBoard.every((c) => c !== null)) {
+          setWinner('draw');
+          setGameOver(true);
+          handleGameOver('draw');
+        }
+      }
+    },
+    [started, board, gameOver, current, human, handleGameOver]
+  );
 
   const renderCell = (idx: number) => {
-    const value = board[idx]
-    const isWinning = winningPattern.includes(idx)
+    const value = board[idx];
+    const isWinning = winningPattern.includes(idx);
     return (
       <motion.button
         key={idx}
@@ -203,9 +219,12 @@ export const TicTacToeGame = () => {
           w-20 h-20 md:w-24 md:h-24 rounded-xl text-4xl md:text-5xl font-black
           flex items-center justify-center
           transition-all duration-200 cursor-pointer
-          ${isWinning
-            ? value === 'X' ? 'bg-neon-cyan/30 border-neon-cyan' : 'bg-neon-purple/30 border-neon-purple'
-            : 'bg-dark-card border border-dark-border hover:border-gray-600'
+          ${
+            isWinning
+              ? value === 'X'
+                ? 'bg-neon-cyan/30 border-neon-cyan'
+                : 'bg-neon-purple/30 border-neon-purple'
+              : 'bg-dark-card border border-dark-border hover:border-gray-600'
           }
           disabled:cursor-not-allowed
         `}
@@ -227,8 +246,8 @@ export const TicTacToeGame = () => {
           )}
         </AnimatePresence>
       </motion.button>
-    )
-  }
+    );
+  };
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -267,7 +286,8 @@ export const TicTacToeGame = () => {
               </div>
             ) : (
               <div className="text-gray-400">
-                Tour: <span className={current === human ? 'text-neon-cyan' : 'text-neon-purple'}>
+                Tour:{' '}
+                <span className={current === human ? 'text-neon-cyan' : 'text-neon-purple'}>
                   {current === human ? `Toi (${human})` : `IA (${human === 'X' ? 'O' : 'X'})`}
                 </span>
               </div>
@@ -305,5 +325,5 @@ export const TicTacToeGame = () => {
         </>
       )}
     </div>
-  )
-}
+  );
+};

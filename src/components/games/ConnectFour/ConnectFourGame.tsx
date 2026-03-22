@@ -1,142 +1,200 @@
 // TODO: integrate leaderboard
 
-import { useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useState } from 'react';
 
-type Player = 1 | 2
-type Cell = Player | null
-type Board = Cell[][]
+type Player = 1 | 2;
+type Cell = Player | null;
+type Board = Cell[][];
 
-const ROWS = 6
-const COLS = 7
+const ROWS = 6;
+const COLS = 7;
 
-const createEmptyBoard = (): Board =>
-  Array.from({ length: ROWS }, () => Array(COLS).fill(null))
+const createEmptyBoard = (): Board => Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 
 const checkWinner = (board: Board): { winner: Player; cells: [number, number][] } | null => {
   // Horizontal
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
-      const p = board[r][c]
+      const p = board[r][c];
       if (p && board[r][c + 1] === p && board[r][c + 2] === p && board[r][c + 3] === p) {
-        return { winner: p, cells: [[r, c], [r, c + 1], [r, c + 2], [r, c + 3]] }
+        return {
+          winner: p,
+          cells: [
+            [r, c],
+            [r, c + 1],
+            [r, c + 2],
+            [r, c + 3],
+          ],
+        };
       }
     }
   }
   // Vertical
   for (let r = 0; r <= ROWS - 4; r++) {
     for (let c = 0; c < COLS; c++) {
-      const p = board[r][c]
+      const p = board[r][c];
       if (p && board[r + 1][c] === p && board[r + 2][c] === p && board[r + 3][c] === p) {
-        return { winner: p, cells: [[r, c], [r + 1, c], [r + 2, c], [r + 3, c]] }
+        return {
+          winner: p,
+          cells: [
+            [r, c],
+            [r + 1, c],
+            [r + 2, c],
+            [r + 3, c],
+          ],
+        };
       }
     }
   }
   // Diagonal \
   for (let r = 0; r <= ROWS - 4; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
-      const p = board[r][c]
-      if (p && board[r + 1][c + 1] === p && board[r + 2][c + 2] === p && board[r + 3][c + 3] === p) {
-        return { winner: p, cells: [[r, c], [r + 1, c + 1], [r + 2, c + 2], [r + 3, c + 3]] }
+      const p = board[r][c];
+      if (
+        p &&
+        board[r + 1][c + 1] === p &&
+        board[r + 2][c + 2] === p &&
+        board[r + 3][c + 3] === p
+      ) {
+        return {
+          winner: p,
+          cells: [
+            [r, c],
+            [r + 1, c + 1],
+            [r + 2, c + 2],
+            [r + 3, c + 3],
+          ],
+        };
       }
     }
   }
   // Diagonal /
   for (let r = 3; r < ROWS; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
-      const p = board[r][c]
-      if (p && board[r - 1][c + 1] === p && board[r - 2][c + 2] === p && board[r - 3][c + 3] === p) {
-        return { winner: p, cells: [[r, c], [r - 1, c + 1], [r - 2, c + 2], [r - 3, c + 3]] }
+      const p = board[r][c];
+      if (
+        p &&
+        board[r - 1][c + 1] === p &&
+        board[r - 2][c + 2] === p &&
+        board[r - 3][c + 3] === p
+      ) {
+        return {
+          winner: p,
+          cells: [
+            [r, c],
+            [r - 1, c + 1],
+            [r - 2, c + 2],
+            [r - 3, c + 3],
+          ],
+        };
       }
     }
   }
-  return null
-}
+  return null;
+};
 
 const getDropRow = (board: Board, col: number): number => {
   for (let r = ROWS - 1; r >= 0; r--) {
-    if (!board[r][col]) return r
+    if (!board[r][col]) return r;
   }
-  return -1
-}
+  return -1;
+};
 
-const isBoardFull = (board: Board): boolean =>
-  board[0].every(cell => cell !== null)
+const isBoardFull = (board: Board): boolean => board[0].every((cell) => cell !== null);
 
 export const ConnectFourGame = () => {
-  const [board, setBoard] = useState<Board>(createEmptyBoard)
-  const [current, setCurrent] = useState<Player>(1)
-  const [winner, setWinner] = useState<Player | 'draw' | null>(null)
-  const [winningCells, setWinningCells] = useState<[number, number][]>([])
-  const [dropping, setDropping] = useState<{ col: number; row: number; player: Player } | null>(null)
-  const [hoverCol, setHoverCol] = useState<number | null>(null)
-  const [gameStarted, setGameStarted] = useState(false)
+  const [board, setBoard] = useState<Board>(createEmptyBoard);
+  const [current, setCurrent] = useState<Player>(1);
+  const [winner, setWinner] = useState<Player | 'draw' | null>(null);
+  const [winningCells, setWinningCells] = useState<[number, number][]>([]);
+  const [dropping, setDropping] = useState<{ col: number; row: number; player: Player } | null>(
+    null
+  );
+  const [hoverCol, setHoverCol] = useState<number | null>(null);
+  const [gameStarted, setGameStarted] = useState(false);
 
   const playerColors = {
-    1: { bg: 'bg-neon-cyan', glow: 'shadow-[0_0_20px_rgba(0,245,255,0.8)]', text: 'text-neon-cyan', border: 'border-neon-cyan' },
-    2: { bg: 'bg-neon-pink', glow: 'shadow-[0_0_20px_rgba(255,55,95,0.8)]', text: 'text-neon-pink', border: 'border-neon-pink' },
-  }
+    1: {
+      bg: 'bg-neon-cyan',
+      glow: 'shadow-[0_0_20px_rgba(0,245,255,0.8)]',
+      text: 'text-neon-cyan',
+      border: 'border-neon-cyan',
+    },
+    2: {
+      bg: 'bg-neon-pink',
+      glow: 'shadow-[0_0_20px_rgba(255,55,95,0.8)]',
+      text: 'text-neon-pink',
+      border: 'border-neon-pink',
+    },
+  };
 
-  const handleColumnClick = useCallback((col: number) => {
-    if (winner || dropping) return
+  const handleColumnClick = useCallback(
+    (col: number) => {
+      if (winner || dropping) return;
 
-    const row = getDropRow(board, col)
-    if (row === -1) return
+      const row = getDropRow(board, col);
+      if (row === -1) return;
 
-    setDropping({ col, row, player: current })
-    setGameStarted(true)
+      setDropping({ col, row, player: current });
+      setGameStarted(true);
 
-    // Animate drop
-    setTimeout(() => {
-      setBoard(prev => {
-        const newBoard = prev.map(r => [...r])
-        newBoard[row][col] = current
-        return newBoard
-      })
-
+      // Animate drop
       setTimeout(() => {
-        setDropping(null)
+        setBoard((prev) => {
+          const newBoard = prev.map((r) => [...r]);
+          newBoard[row][col] = current;
+          return newBoard;
+        });
 
-        // Check winner after piece is placed
-        setBoard(prev => {
-          const result = checkWinner(prev)
-          if (result) {
-            setWinner(result.winner)
-            setWinningCells(result.cells)
-          } else if (isBoardFull(prev)) {
-            setWinner('draw')
-          } else {
-            setCurrent(current === 1 ? 2 : 1)
-          }
-          return prev
-        })
-      }, 50)
-    }, 400)
-  }, [board, current, winner, dropping])
+        setTimeout(() => {
+          setDropping(null);
+
+          // Check winner after piece is placed
+          setBoard((prev) => {
+            const result = checkWinner(prev);
+            if (result) {
+              setWinner(result.winner);
+              setWinningCells(result.cells);
+            } else if (isBoardFull(prev)) {
+              setWinner('draw');
+            } else {
+              setCurrent(current === 1 ? 2 : 1);
+            }
+            return prev;
+          });
+        }, 50);
+      }, 400);
+    },
+    [board, current, winner, dropping]
+  );
 
   const reset = useCallback(() => {
-    setBoard(createEmptyBoard())
-    setCurrent(1)
-    setWinner(null)
-    setWinningCells([])
-    setDropping(null)
-    setGameStarted(false)
-  }, [])
+    setBoard(createEmptyBoard());
+    setCurrent(1);
+    setWinner(null);
+    setWinningCells([]);
+    setDropping(null);
+    setGameStarted(false);
+  }, []);
 
   const isWinningCell = (r: number, c: number) =>
-    winningCells.some(([wr, wc]) => wr === r && wc === c)
+    winningCells.some(([wr, wc]) => wr === r && wc === c);
 
   const statusText = () => {
-    if (winner === 'draw') return 'Égalité !'
-    if (winner) return `Joueur ${winner} gagne ! 🎉`
-    return `Tour du Joueur ${current}`
-  }
+    if (winner === 'draw') return 'Égalité !';
+    if (winner) return `Joueur ${winner} gagne ! 🎉`;
+    return `Tour du Joueur ${current}`;
+  };
 
-  const statusColor = winner === 1 || (winner === null && current === 1)
-    ? playerColors[1].text
-    : winner === 2 ? playerColors[2].text
-    : winner === 'draw' ? 'text-gray-400'
-    : 'text-gray-300'
+  const statusColor =
+    winner === 1 || (winner === null && current === 1)
+      ? playerColors[1].text
+      : winner === 2
+        ? playerColors[2].text
+        : winner === 'draw'
+          ? 'text-gray-400'
+          : 'text-gray-300';
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -176,10 +234,7 @@ export const ConnectFourGame = () => {
       {/* Board wrapper */}
       <div className="relative">
         {/* Board */}
-        <motion.div
-          className="relative p-3 rounded-2xl glass border border-dark-border"
-          layout
-        >
+        <motion.div className="relative p-3 rounded-2xl glass border border-dark-border" layout>
           {/* Hover column indicator overlay */}
           <AnimatePresence>
             {hoverCol !== null && !winner && !dropping && (
@@ -209,9 +264,9 @@ export const ConnectFourGame = () => {
           >
             {Array.from({ length: ROWS }, (_, r) =>
               Array.from({ length: COLS }, (_, c) => {
-                const player = board[r][c]
-                const isWin = isWinningCell(r, c)
-                const isDroppingHere = dropping && dropping.row === r && dropping.col === c
+                const player = board[r][c];
+                const isWin = isWinningCell(r, c);
+                const isDroppingHere = dropping && dropping.row === r && dropping.col === c;
 
                 return (
                   <motion.div
@@ -274,7 +329,7 @@ export const ConnectFourGame = () => {
                       />
                     )}
                   </motion.div>
-                )
+                );
               })
             )}
           </div>
@@ -302,12 +357,20 @@ export const ConnectFourGame = () => {
 
       {/* Player indicators */}
       <div className="flex items-center gap-6 mt-2">
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl glass border ${current === 1 && !winner ? 'border-neon-cyan/60' : 'border-dark-border'}`}>
-          <div className={`w-4 h-4 rounded-full bg-neon-cyan ${current === 1 && !winner ? 'shadow-[0_0_10px_rgba(0,245,255,0.8)]' : ''}`} />
+        <div
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl glass border ${current === 1 && !winner ? 'border-neon-cyan/60' : 'border-dark-border'}`}
+        >
+          <div
+            className={`w-4 h-4 rounded-full bg-neon-cyan ${current === 1 && !winner ? 'shadow-[0_0_10px_rgba(0,245,255,0.8)]' : ''}`}
+          />
           <span className="text-sm font-semibold text-neon-cyan">Joueur 1</span>
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl glass border ${current === 2 && !winner ? 'border-neon-pink/60' : 'border-dark-border'}`}>
-          <div className={`w-4 h-4 rounded-full bg-neon-pink ${current === 2 && !winner ? 'shadow-[0_0_10px_rgba(255,55,95,0.8)]' : ''}`} />
+        <div
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl glass border ${current === 2 && !winner ? 'border-neon-pink/60' : 'border-dark-border'}`}
+        >
+          <div
+            className={`w-4 h-4 rounded-full bg-neon-pink ${current === 2 && !winner ? 'shadow-[0_0_10px_rgba(255,55,95,0.8)]' : ''}`}
+          />
           <span className="text-sm font-semibold text-neon-pink">Joueur 2</span>
         </div>
       </div>
@@ -323,5 +386,5 @@ export const ConnectFourGame = () => {
         </motion.p>
       )}
     </div>
-  )
-}
+  );
+};

@@ -1,6 +1,6 @@
-import { Header } from '@/components/Header'
-import { RouterProvider } from '@tanstack/react-router'
-import { router } from '@/router'
+import { RouterProvider } from '@tanstack/react-router';
+import { Header } from '@/components/Header';
+import { router } from '@/router';
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
         <p>6 mini jeux · React + Canvas · Rywoox</p>
       </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

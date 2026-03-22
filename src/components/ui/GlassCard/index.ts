@@ -1,2 +1,2 @@
-export { GlassCard } from './GlassCard'
-export type { GlassCardProps } from './GlassCard.types'
+export { GlassCard } from './GlassCard';
+export type { GlassCardProps } from './GlassCard.types';

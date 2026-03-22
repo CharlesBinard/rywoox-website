@@ -1,1 +1,1 @@
-export { MemoryGame } from './MemoryGame'
+export { MemoryGame } from './MemoryGame';

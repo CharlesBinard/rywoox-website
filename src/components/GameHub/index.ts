@@ -1,1 +1,1 @@
-export { GameHub } from './GameHub'
+export { GameHub } from './GameHub';

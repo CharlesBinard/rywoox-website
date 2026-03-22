@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
 interface HeaderProps {
-  title?: string
-  showBack?: boolean
-  onBack?: () => void
+  title?: string;
+  showBack?: boolean;
+  onBack?: () => void;
 }
 
 export const Header = ({ title, showBack, onBack }: HeaderProps) => {
@@ -30,11 +30,9 @@ export const Header = ({ title, showBack, onBack }: HeaderProps) => {
               <span className="font-bold text-xl gradient-text">Rywoox</span>
             </div>
           )}
-          <div className="text-sm font-mono text-gray-500">
-            {title && !showBack ? title : null}
-          </div>
+          <div className="text-sm font-mono text-gray-500">{title && !showBack ? title : null}</div>
         </div>
       </div>
     </motion.header>
-  )
-}
+  );
+};

@@ -1,1 +1,1 @@
-export { PongGame } from './PongGame'
+export { PongGame } from './PongGame';

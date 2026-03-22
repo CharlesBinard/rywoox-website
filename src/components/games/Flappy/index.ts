@@ -1,1 +1,1 @@
-export { FlappyGame } from './FlappyGame'
+export { FlappyGame } from './FlappyGame';

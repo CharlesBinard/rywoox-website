@@ -1,29 +1,29 @@
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost'
-type ButtonSize = 'sm' | 'md' | 'lg'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+type ButtonSize = 'sm' | 'md' | 'lg';
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: 'bg-gradient-to-r from-neon-cyan to-neon-purple text-black',
   secondary: 'glass glow-border text-white',
   ghost: 'text-gray-400 hover:text-white hover:bg-white/5',
-}
+};
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: 'px-4 py-2 text-sm',
   md: 'px-6 py-3 text-base',
   lg: 'px-8 py-4 text-lg',
-}
+};
 
 interface ButtonProps {
-  variant?: ButtonVariant
-  size?: ButtonSize
-  isLoading?: boolean
-  disabled?: boolean
-  className?: string
-  children?: React.ReactNode
-  type?: 'button' | 'submit' | 'reset'
-  onClick?: React.MouseEventHandler<HTMLButtonElement>
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  isLoading?: boolean;
+  disabled?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+  type?: 'button' | 'submit' | 'reset';
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export const Button = ({
@@ -53,5 +53,5 @@ export const Button = ({
     >
       {isLoading ? '...' : children}
     </motion.button>
-  )
-}
+  );
+};

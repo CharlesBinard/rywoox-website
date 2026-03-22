@@ -5,5 +5,5 @@ export const TypingIndicator = () => {
       <span className="typing-dot text-neon-purple text-2xl">●</span>
       <span className="typing-dot text-neon-pink text-2xl">●</span>
     </div>
-  )
-}
+  );
+};

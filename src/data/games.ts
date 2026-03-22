@@ -1,4 +1,4 @@
-import type { Game } from '@/types/games'
+import type { Game } from '@/types/games';
 
 export const GAMES: Game[] = [
   {
@@ -57,4 +57,4 @@ export const GAMES: Game[] = [
     color: '#ff375f',
     hue: 'pink',
   },
-]
+];

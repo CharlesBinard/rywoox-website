@@ -1,10 +1,10 @@
-import { motion } from 'framer-motion'
-import { GameCard } from '@/components/ui'
-import { GAMES } from '@/data/games'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router';
+import { motion } from 'framer-motion';
+import { GameCard } from '@/components/ui';
+import { GAMES } from '@/data/games';
 
 export const GameHub = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-24">
@@ -50,5 +50,5 @@ export const GameHub = () => {
         6 jeux · fait avec React & Canvas
       </motion.p>
     </div>
-  )
-}
+  );
+};
