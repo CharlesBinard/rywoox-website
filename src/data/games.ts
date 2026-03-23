@@ -65,4 +65,12 @@ export const GAMES: Game[] = [
     color: '#00f5ff',
     hue: 'cyan',
   },
+  {
+    id: 'minesweeper',
+    name: 'Minesweeper',
+    description: "Trouve les mines. Un faux pas et c'est fini.",
+    emoji: '💣',
+    color: '#8b949e',
+    hue: 'gray',
+  },
 ];

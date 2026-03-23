@@ -1,6 +1,7 @@
 export { ConnectFourGame } from './ConnectFour';
 export { FlappyGame } from './Flappy';
 export { MemoryGame } from './Memory';
+export { MinesweeperGame } from './Minesweeper';
 export { NumberMergeGame } from './NumberMerge';
 export { PongGame } from './Pong';
 export { SnakeGame } from './Snake';

@@ -36,6 +36,11 @@ const gameComponents: Record<GameId, React.LazyExoticComponent<React.ComponentTy
       default: m.NumberMergeGame,
     }))
   ),
+  minesweeper: lazy(() =>
+    import('@/components/games/Minesweeper/MinesweeperGame').then((m) => ({
+      default: m.MinesweeperGame,
+    }))
+  ),
 };
 
 const colorMap: Record<string, string> = {
@@ -45,6 +50,7 @@ const colorMap: Record<string, string> = {
   green: 'text-green-400',
   yellow: 'text-yellow-400',
   orange: 'text-orange-400',
+  gray: 'text-gray-400',
 };
 
 const GameFallback = () => (
