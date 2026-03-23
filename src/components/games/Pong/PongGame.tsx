@@ -1,13 +1,12 @@
 'use client';
 
-// TODO: integrate leaderboard
-
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAudio } from '@/hooks/useAudio';
+import { GameOverlay } from '@/components/ui';
 import { useAchievementStore } from '@/stores/achievementStore';
 
-const WIDTH = 800;
-const HEIGHT = 500;
+const BASE_W = 800;
+const BASE_H = 500;
 const PADDLE_W = 12;
 const PADDLE_H = 80;
 const BALL_R = 8;
@@ -20,8 +19,7 @@ const GAME_ID = 'pong';
 type Vec2 = { x: number; y: number };
 type GameState = 'idle' | 'playing' | 'scored' | 'gameover' | 'countdown';
 
-const paddleY = (HEIGHT - PADDLE_H) / 2;
-const aiY = (HEIGHT - PADDLE_H) / 2;
+const BASE_PADDLE_Y = (BASE_H - PADDLE_H) / 2;
 
 export const PongGame = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,18 +31,40 @@ export const PongGame = () => {
   const [winner, setWinner] = useState<'player' | 'ai' | null>(null);
   const [countdown, setCountdown] = useState(2);
 
-  const ballRef = useRef<Vec2>({ x: WIDTH / 2, y: HEIGHT / 2 });
+  const ballRef = useRef<Vec2>({ x: BASE_W / 2, y: BASE_H / 2 });
   const velRef = useRef<Vec2>({ x: 5, y: 3 });
-  const playerPaddleRef = useRef(paddleY);
-  const aiPaddleRef = useRef(aiY);
+  const playerPaddleRef = useRef(BASE_PADDLE_Y);
+  const aiPaddleRef = useRef(BASE_PADDLE_Y);
   const gameLoopRef = useRef<number | null>(null);
   const keysRef = useRef<Set<string>>(new Set());
   const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const launchDirRef = useRef(1);
   const lastBounceRef = useRef<number>(0);
+  const scaleRef = useRef(1);
+
+  // Responsive canvas sizing
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const updateSize = () => {
+      const maxW = Math.min(BASE_W, canvas.parentElement?.clientWidth ?? BASE_W);
+      const scale = maxW / BASE_W;
+      scaleRef.current = scale;
+      canvas.width = BASE_W;
+      canvas.height = BASE_H;
+      canvas.style.width = `${BASE_W * scale}px`;
+      canvas.style.height = `${BASE_H * scale}px`;
+    };
+
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(canvas.parentElement || document.body);
+    return () => ro.disconnect();
+  }, []);
 
   const resetBall = useCallback((_dir: number) => {
-    ballRef.current = { x: WIDTH / 2, y: HEIGHT / 2 };
+    ballRef.current = { x: BASE_W / 2, y: BASE_H / 2 };
     velRef.current = { x: 0, y: 0 };
   }, []);
 
@@ -126,7 +146,7 @@ export const PongGame = () => {
         keysRef.current.has('S')
       ) {
         playerPaddleRef.current = Math.min(
-          HEIGHT - PADDLE_H,
+          BASE_H - PADDLE_H,
           playerPaddleRef.current + PLAYER_SPEED
         );
       }
@@ -137,7 +157,7 @@ export const PongGame = () => {
         if (ball.y < aiCenter - 10) {
           aiPaddleRef.current = Math.max(0, aiPaddleRef.current - AI_SPEED);
         } else if (ball.y > aiCenter + 10) {
-          aiPaddleRef.current = Math.min(HEIGHT - PADDLE_H, aiPaddleRef.current + AI_SPEED);
+          aiPaddleRef.current = Math.min(BASE_H - PADDLE_H, aiPaddleRef.current + AI_SPEED);
         }
 
         // Ball movement
@@ -149,8 +169,8 @@ export const PongGame = () => {
           ball.y = BALL_R;
           vel.y = Math.abs(vel.y);
         }
-        if (ball.y + BALL_R >= HEIGHT) {
-          ball.y = HEIGHT - BALL_R;
+        if (ball.y + BALL_R >= BASE_H) {
+          ball.y = BASE_H - BALL_R;
           vel.y = -Math.abs(vel.y);
         }
 
@@ -172,11 +192,11 @@ export const PongGame = () => {
         }
 
         // AI paddle collision
-        if (ball.x + BALL_R >= WIDTH - PADDLE_W - 20 && ball.x < WIDTH - 20) {
+        if (ball.x + BALL_R >= BASE_W - PADDLE_W - 20 && ball.x < BASE_W - 20) {
           const paddleTop = aiPaddleRef.current;
           const paddleBottom = aiPaddleRef.current + PADDLE_H;
           if (ball.y >= paddleTop && ball.y <= paddleBottom) {
-            ball.x = WIDTH - PADDLE_W - 20 - BALL_R;
+            ball.x = BASE_W - PADDLE_W - 20 - BALL_R;
             const hitPos = (ball.y - paddleTop) / PADDLE_H;
             vel.x = -Math.abs(vel.x) * 1.05;
             vel.y = (hitPos - 0.5) * 10;
@@ -205,7 +225,7 @@ export const PongGame = () => {
           });
           return;
         }
-        if (ball.x > WIDTH) {
+        if (ball.x > BASE_W) {
           setPlayerScore((s) => {
             const ns = s + 1;
             if (ns >= WIN_SCORE) {
@@ -230,52 +250,53 @@ export const PongGame = () => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
+      const scale = scaleRef.current;
       ctx.fillStyle = '#0a0a0f';
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+      ctx.fillRect(0, 0, BASE_W, BASE_H);
 
       // Center line
       ctx.setLineDash([10, 10]);
       ctx.strokeStyle = 'rgba(0, 245, 255, 0.15)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(WIDTH / 2, 0);
-      ctx.lineTo(WIDTH / 2, HEIGHT);
+      ctx.moveTo(BASE_W / 2, 0);
+      ctx.lineTo(BASE_W / 2, BASE_H);
       ctx.stroke();
       ctx.setLineDash([]);
 
       // Player paddle
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 20 * scale;
       ctx.shadowColor = '#00f5ff';
       ctx.fillStyle = '#00f5ff';
       ctx.beginPath();
-      ctx.roundRect(20, playerPaddleRef.current, PADDLE_W, PADDLE_H, 4);
+      ctx.roundRect(20 * scale, playerPaddleRef.current * scale, PADDLE_W * scale, PADDLE_H * scale, 4);
       ctx.fill();
 
       // AI paddle
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 20 * scale;
       ctx.shadowColor = '#bf5af2';
       ctx.fillStyle = '#bf5af2';
       ctx.beginPath();
-      ctx.roundRect(WIDTH - 20 - PADDLE_W, aiPaddleRef.current, PADDLE_W, PADDLE_H, 4);
+      ctx.roundRect((BASE_W - 20 - PADDLE_W) * scale, aiPaddleRef.current * scale, PADDLE_W * scale, PADDLE_H * scale, 4);
       ctx.fill();
 
       // Ball
-      ctx.shadowBlur = 25;
+      ctx.shadowBlur = 25 * scale;
       ctx.shadowColor = '#ff375f';
       ctx.fillStyle = '#ff375f';
       ctx.beginPath();
-      ctx.arc(ballRef.current.x, ballRef.current.y, BALL_R, 0, Math.PI * 2);
+      ctx.arc(ballRef.current.x * scale, ballRef.current.y * scale, BALL_R * scale, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.shadowBlur = 0;
 
       // Scores
-      ctx.font = 'bold 48px Inter, sans-serif';
+      ctx.font = `bold ${48 * scale}px Inter, sans-serif`;
       ctx.fillStyle = 'rgba(0, 245, 255, 0.3)';
       ctx.textAlign = 'center';
-      ctx.fillText(String(playerScore), WIDTH / 4, 60);
+      ctx.fillText(String(playerScore), BASE_W / 4 * scale, 60 * scale);
       ctx.fillStyle = 'rgba(191, 90, 242, 0.3)';
-      ctx.fillText(String(aiScore), (WIDTH * 3) / 4, 60);
+      ctx.fillText(String(aiScore), (BASE_W * 3) / 4 * scale, 60 * scale);
     };
 
     const loop = () => {
@@ -335,29 +356,32 @@ export const PongGame = () => {
       <div className="relative">
         <canvas
           ref={canvasRef}
-          width={WIDTH}
-          height={HEIGHT}
-          className="rounded-xl border border-dark-border max-w-full"
+          className="rounded-xl border border-dark-border"
+          style={{ maxWidth: 'min(800px, 100%)' }}
         />
 
         {gameState === 'idle' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-dark-bg/85 rounded-xl">
-            <div className="text-5xl mb-4">🏓</div>
-            <div className="text-2xl font-bold gradient-text mb-2">PONG</div>
-            <div className="text-gray-400 text-sm mb-6 text-center">
-              <span className="text-white">↑↓</span> ou <span className="text-white">W/S</span> pour
-              bouger
-            </div>
-            <button
-              onClick={() => {
-                playSound('click');
-                startGame();
-              }}
-              className="px-8 py-3 rounded-lg bg-neon-cyan/20 border border-neon-cyan text-neon-cyan font-bold hover:bg-neon-cyan/30 transition-all cursor-pointer"
-            >
-              JOUER
-            </button>
-          </div>
+          <GameOverlay
+            emoji="🏓"
+            title="PONG"
+            subtitle={
+              <>
+                <span className="text-white">↑↓</span> ou <span className="text-white">W/S</span>{' '}
+                pour bouger
+              </>
+            }
+            buttons={[
+              {
+                label: 'JOUER',
+                onClick: () => {
+                  playSound('click');
+                  startGame();
+                },
+                variant: 'primary',
+              },
+            ]}
+            variant="start"
+          />
         )}
 
         {gameState === 'countdown' && (
@@ -368,26 +392,22 @@ export const PongGame = () => {
         )}
 
         {gameState === 'gameover' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-dark-bg/85 rounded-xl">
-            <div className="text-5xl mb-4">{winner === 'player' ? '🏆' : '🤖'}</div>
-            <div
-              className={`text-2xl font-bold mb-2 ${winner === 'player' ? 'text-neon-cyan' : 'text-neon-purple'}`}
-            >
-              {winner === 'player' ? 'TROP FORT !' : "L'IA GAGNE..."}
-            </div>
-            <div className="text-gray-400 mb-6">
-              {playerScore} - {aiScore}
-            </div>
-            <button
-              onClick={() => {
-                playSound('click');
-                startGame();
-              }}
-              className="px-8 py-3 rounded-lg bg-neon-cyan/20 border border-neon-cyan text-neon-cyan font-bold hover:bg-neon-cyan/30 transition-all cursor-pointer"
-            >
-              REJOUER
-            </button>
-          </div>
+          <GameOverlay
+            emoji={winner === 'player' ? '🏆' : '🤖'}
+            title={winner === 'player' ? 'TROP FORT !' : "L'IA GAGNE..."}
+            subtitle={`${playerScore} - ${aiScore}`}
+            buttons={[
+              {
+                label: 'REJOUER',
+                onClick: () => {
+                  playSound('click');
+                  startGame();
+                },
+                variant: 'primary',
+              },
+            ]}
+            variant={winner === 'player' ? 'win' : 'gameover'}
+          />
         )}
       </div>
 

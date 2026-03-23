@@ -5,11 +5,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAudio } from '@/hooks/useAudio';
 import { useGameStore } from '@/stores/gameStore';
 
-const WIDTH = 800;
-const HEIGHT = 500;
+const BASE_W = 800;
+const BASE_H = 500;
 const PADDLE_W = 120;
 const PADDLE_H = 14;
-const PADDLE_Y = HEIGHT - 40;
 const BALL_R = 8;
 const BALL_SPEED_INIT = 6;
 const BALL_SPEED_INC = 0.15;
@@ -19,7 +18,7 @@ const BRICK_W = 68;
 const BRICK_H = 22;
 const BRICK_GAP = 6;
 const BRICK_TOP = 60;
-const BRICK_LEFT = (WIDTH - (BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP)) / 2;
+const BRICK_LEFT = (BASE_W - (BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP)) / 2;
 
 const GAME_ID = 'breakout';
 
@@ -37,7 +36,7 @@ interface Brick {
   alive: boolean;
 }
 
-const createBricks = (): Brick[] => {
+const createBricksBase = (): Brick[] => {
   const bricks: Brick[] = [];
   for (let row = 0; row < BRICK_ROWS; row++) {
     for (let col = 0; col < BRICK_COLS; col++) {
@@ -63,22 +62,49 @@ export const BreakoutGame = () => {
   const [lives, setLives] = useState(3);
   const [gameState, setGameState] = useState<GameState>('idle');
 
-  const ballRef = useRef<Vec2>({ x: WIDTH / 2, y: PADDLE_Y - BALL_R - 10 });
+  const ballRef = useRef<Vec2>({ x: BASE_W / 2, y: BASE_H - 40 - BALL_R - 10 });
   const velRef = useRef<Vec2>({ x: 0, y: 0 });
-  const paddleRef = useRef(WIDTH / 2 - PADDLE_W / 2);
-  const bricksRef = useRef<Brick[]>(createBricks());
+  const paddleRef = useRef(BASE_W / 2 - PADDLE_W / 2);
+  const bricksRef = useRef<Brick[]>(createBricksBase());
   const ballSpeedRef = useRef(BALL_SPEED_INIT);
   const mouseXRef = useRef<number | null>(null);
   const launchedRef = useRef(false);
   const animationFrameRef = useRef<number | null>(null);
   const lastPaddleBounceRef = useRef<number>(0);
   const lastBrickBounceRef = useRef<number>(0);
+  const scaleRef = useRef(1);
+  const canvasWRef = useRef(BASE_W);
+  const canvasHRef = useRef(BASE_H);
 
   const bestScore = getBestScore(GAME_ID);
 
+  // Handle responsive canvas sizing
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const updateSize = () => {
+      const maxW = Math.min(BASE_W, canvas.parentElement?.clientWidth ?? BASE_W);
+      const scale = maxW / BASE_W;
+      scaleRef.current = scale;
+      canvasWRef.current = BASE_W;
+      canvasHRef.current = BASE_H;
+      canvas.width = BASE_W;
+      canvas.height = BASE_H;
+      canvas.style.width = `${BASE_W * scale}px`;
+      canvas.style.height = `${BASE_H * scale}px`;
+    };
+
+    updateSize();
+
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(canvas.parentElement || document.body);
+    return () => ro.disconnect();
+  }, []);
+
   const resetBall = useCallback(() => {
     const paddleCenter = paddleRef.current + PADDLE_W / 2;
-    ballRef.current = { x: paddleCenter, y: PADDLE_Y - BALL_R - 10 };
+    ballRef.current = { x: paddleCenter, y: BASE_H - 40 - BALL_R - 10 };
     velRef.current = { x: 0, y: 0 };
     launchedRef.current = false;
     ballSpeedRef.current = BALL_SPEED_INIT;
@@ -97,8 +123,8 @@ export const BreakoutGame = () => {
   const startGame = useCallback(() => {
     setScore(0);
     setLives(3);
-    bricksRef.current = createBricks();
-    paddleRef.current = WIDTH / 2 - PADDLE_W / 2;
+    bricksRef.current = createBricksBase();
+    paddleRef.current = BASE_W / 2 - PADDLE_W / 2;
     resetBall();
     setGameState('playing');
   }, [resetBall]);
@@ -109,14 +135,14 @@ export const BreakoutGame = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
-      const scaleX = WIDTH / rect.width;
+      const scaleX = canvasWRef.current / rect.width;
       mouseXRef.current = (e.clientX - rect.left) * scaleX;
     };
     const handleTouchMove = (e: TouchEvent) => {
       const canvas = canvasRef.current;
       if (!canvas || !e.touches[0]) return;
       const rect = canvas.getBoundingClientRect();
-      const scaleX = WIDTH / rect.width;
+      const scaleX = canvasWRef.current / rect.width;
       mouseXRef.current = (e.touches[0].clientX - rect.left) * scaleX;
     };
     const handleClick = () => {
@@ -140,6 +166,8 @@ export const BreakoutGame = () => {
   useEffect(() => {
     if (gameState !== 'playing') return;
 
+    const PADDLE_Y = BASE_H - 40;
+
     const update = () => {
       const ball = ballRef.current;
       const vel = velRef.current;
@@ -149,7 +177,7 @@ export const BreakoutGame = () => {
       if (mouseXRef.current !== null) {
         paddleRef.current = Math.max(
           0,
-          Math.min(WIDTH - PADDLE_W, mouseXRef.current - PADDLE_W / 2)
+          Math.min(BASE_W - PADDLE_W, mouseXRef.current - PADDLE_W / 2)
         );
       }
 
@@ -169,8 +197,8 @@ export const BreakoutGame = () => {
         ball.x = BALL_R;
         vel.x = Math.abs(vel.x);
       }
-      if (ball.x + BALL_R >= WIDTH) {
-        ball.x = WIDTH - BALL_R;
+      if (ball.x + BALL_R >= BASE_W) {
+        ball.x = BASE_W - BALL_R;
         vel.x = -Math.abs(vel.x);
       }
       if (ball.y - BALL_R <= 0) {
@@ -179,7 +207,7 @@ export const BreakoutGame = () => {
       }
 
       // Ball falls below paddle — lose life
-      if (ball.y > HEIGHT + BALL_R) {
+      if (ball.y > BASE_H + BALL_R) {
         playSound('loseLife');
         setLives((l) => {
           const nl = l - 1;
@@ -264,39 +292,43 @@ export const BreakoutGame = () => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
+      const scale = scaleRef.current;
+      const W = canvasWRef.current;
+      const H = canvasHRef.current;
+
       ctx.fillStyle = '#0a0a0f';
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+      ctx.fillRect(0, 0, W, H);
 
       // Border glow
       ctx.strokeStyle = 'rgba(0, 245, 255, 0.1)';
       ctx.lineWidth = 2;
-      ctx.strokeRect(1, 1, WIDTH - 2, HEIGHT - 2);
+      ctx.strokeRect(1, 1, W - 2, H - 2);
 
       // Bricks
       for (const brick of bricksRef.current) {
         if (!brick.alive) continue;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 15 * scale;
         ctx.shadowColor = brick.color;
         ctx.fillStyle = brick.color;
         ctx.beginPath();
-        ctx.roundRect(brick.x, brick.y, BRICK_W, BRICK_H, 4);
+        ctx.roundRect(brick.x * scale, brick.y * scale, BRICK_W * scale, BRICK_H * scale, 4);
         ctx.fill();
       }
 
       // Paddle
-      ctx.shadowBlur = 25;
+      ctx.shadowBlur = 25 * scale;
       ctx.shadowColor = '#00f5ff';
       ctx.fillStyle = '#00f5ff';
       ctx.beginPath();
-      ctx.roundRect(paddleRef.current, PADDLE_Y, PADDLE_W, PADDLE_H, 7);
+      ctx.roundRect(paddleRef.current * scale, PADDLE_Y * scale, PADDLE_W * scale, PADDLE_H * scale, 7);
       ctx.fill();
 
       // Ball
-      ctx.shadowBlur = 25;
+      ctx.shadowBlur = 25 * scale;
       ctx.shadowColor = '#ff375f';
       ctx.fillStyle = '#ff375f';
       ctx.beginPath();
-      ctx.arc(ballRef.current.x, ballRef.current.y, BALL_R, 0, Math.PI * 2);
+      ctx.arc(ballRef.current.x * scale, ballRef.current.y * scale, BALL_R * scale, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.shadowBlur = 0;
@@ -350,10 +382,8 @@ export const BreakoutGame = () => {
       <div className="relative">
         <canvas
           ref={canvasRef}
-          width={WIDTH}
-          height={HEIGHT}
-          className="rounded-xl border border-dark-border max-w-full cursor-none"
-          style={{ touchAction: 'none' }}
+          className="rounded-xl border border-dark-border cursor-none"
+          style={{ touchAction: 'none', maxWidth: 'min(800px, 100%)' }}
         />
 
         <AnimatePresence>

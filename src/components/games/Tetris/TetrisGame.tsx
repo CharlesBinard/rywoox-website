@@ -1,10 +1,9 @@
 'use client';
 
-// TODO: integrate leaderboard
-
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAudio } from '@/hooks/useAudio';
 import { useAchievementStore } from '@/stores/achievementStore';
+import { useGameStore } from '@/stores/gameStore';
 
 const COLS = 10;
 const ROWS = 20;
@@ -82,7 +81,9 @@ const rotate = (shape: number[][]): number[][] => {
 
 export const TetrisGame = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const checkAchievements = useAchievementStore((s) => s.checkAchievements);
+  const saveScore = useGameStore((s) => s.saveScore);
   const { playSound, startMusic, pauseMusic } = useAudio();
   const [score, setScore] = useState(0);
   const [lines, setLines] = useState(0);
@@ -95,6 +96,32 @@ export const TetrisGame = () => {
   const posRef = useRef<Pos>({ x: 0, y: 0 });
   const keysRef = useRef<Set<string>>(new Set());
   const nextPieceRef = useRef<Piece>(randomPiece());
+  const scaleRef = useRef(1);
+  const canvasWRef = useRef(COLS * CELL);
+  const canvasHRef = useRef(ROWS * CELL);
+
+  // Responsive canvas sizing
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const updateSize = () => {
+      const maxW = Math.min(COLS * CELL, canvas.parentElement?.clientWidth ?? COLS * CELL);
+      const scale = maxW / (COLS * CELL);
+      scaleRef.current = scale;
+      canvasWRef.current = COLS * CELL;
+      canvasHRef.current = ROWS * CELL;
+      canvas.width = COLS * CELL;
+      canvas.height = ROWS * CELL;
+      canvas.style.width = `${COLS * CELL * scale}px`;
+      canvas.style.height = `${ROWS * CELL * scale}px`;
+    };
+
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(canvas.parentElement || document.body);
+    return () => ro.disconnect();
+  }, []);
 
   const spawnPiece = useCallback(() => {
     const p = nextPieceRef.current;
@@ -225,8 +252,8 @@ export const TetrisGame = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const W = COLS * CELL;
-    const H = ROWS * CELL;
+    const W = canvasWRef.current;
+    const H = canvasHRef.current;
 
     ctx.fillStyle = '#0a0a0f';
     ctx.fillRect(0, 0, W, H);
@@ -286,6 +313,44 @@ export const TetrisGame = () => {
     }
 
     ctx.shadowBlur = 0;
+
+    // Render next piece preview
+    const previewCanvas = previewCanvasRef.current;
+    if (previewCanvas) {
+      const pCtx = previewCanvas.getContext('2d');
+      if (pCtx) {
+        const nextPiece = nextPieceRef.current;
+        const previewCell = 14;
+        const pCols = nextPiece.shape[0].length;
+        const pRows = nextPiece.shape.length;
+        const pW = pCols * previewCell;
+        const pH = pRows * previewCell;
+        previewCanvas.width = pW + 4;
+        previewCanvas.height = pH + 4;
+        pCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        pCtx.fillStyle = '#0a0a0f';
+        pCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        pCtx.shadowBlur = 8;
+        pCtx.shadowColor = COLORS[nextPiece.color];
+        pCtx.fillStyle = COLORS[nextPiece.color];
+        for (let r = 0; r < nextPiece.shape.length; r++) {
+          for (let c = 0; c < nextPiece.shape[r].length; c++) {
+            if (nextPiece.shape[r][c]) {
+              pCtx.beginPath();
+              pCtx.roundRect(
+                c * previewCell + 2,
+                r * previewCell + 2,
+                previewCell - 2,
+                previewCell - 2,
+                3
+              );
+              pCtx.fill();
+            }
+          }
+        }
+        pCtx.shadowBlur = 0;
+      }
+    }
   }, []);
 
   const startGame = useCallback(() => {
@@ -384,9 +449,10 @@ export const TetrisGame = () => {
   // Check achievements on game over
   useEffect(() => {
     if (gameOver && started) {
+      saveScore(GAME_ID, score);
       checkAchievements(GAME_ID, { bestScore: score, gamesPlayed: 1 });
     }
-  }, [gameOver, started, score, checkAchievements]);
+  }, [gameOver, started, score, checkAchievements, saveScore]);
 
   // Music control based on started state
   useEffect(() => {
@@ -406,21 +472,28 @@ export const TetrisGame = () => {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="flex gap-6 text-sm font-mono">
+      <div className="flex gap-6 text-sm font-mono items-center">
         <div className="text-neon-cyan">
           SCORE <span className="text-white font-bold">{score}</span>
         </div>
         <div className="text-green-400">
           LIGNES <span className="text-white font-bold">{lines}</span>
         </div>
+        <div className="flex flex-col items-center gap-1">
+          <div className="text-gray-500 text-xs">SUIVANT</div>
+          <canvas
+            ref={previewCanvasRef}
+            className="rounded"
+            style={{ boxShadow: '0 0 10px rgba(0,245,255,0.1)' }}
+          />
+        </div>
       </div>
 
       <div className="relative">
         <canvas
           ref={canvasRef}
-          width={COLS * CELL}
-          height={ROWS * CELL}
           className="rounded-xl border border-dark-border"
+          style={{ maxWidth: `min(${COLS * CELL}px, 100%)` }}
         />
 
         {!started && !gameOver && (
