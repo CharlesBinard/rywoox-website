@@ -302,12 +302,13 @@ export const MinesweeperGame = () => {
       }
 
       // Check win
+      // Check win
       if (checkWin(newBoard)) {
         setGameState('won');
         saveScore(GAME_ID, elapsed);
       }
     },
-    [board, gameState]
+    [board, gameState, elapsed, saveScore]
   );
 
   const handleFlag = useCallback(

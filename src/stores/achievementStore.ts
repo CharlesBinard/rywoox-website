@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { GAMES } from '@/data/games';
 import {
   ACHIEVEMENTS_BY_GAME,
   type AchievementId,
   ALL_ACHIEVEMENTS,
   GLOBAL_ACHIEVEMENTS,
 } from '@/lib/achievements';
-import { GAMES } from '@/data/games';
 
 export interface GameStats {
   wins: number;

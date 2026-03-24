@@ -84,15 +84,20 @@ export const BreakoutGame = () => {
     if (!canvas) return;
 
     const updateSize = () => {
-      const maxW = Math.min(BASE_W, canvas.parentElement?.clientWidth ?? BASE_W);
+      const parentWidth = canvas.parentElement?.clientWidth ?? 0;
+      // Guard: if parent has no width yet, skip resize and keep current size
+      if (!parentWidth) return;
+      const maxW = Math.min(BASE_W, parentWidth);
       const scale = maxW / BASE_W;
-      scaleRef.current = scale;
+      // Ensure a minimum scale so the canvas is never tiny
+      const safeScale = scale > 0 ? scale : 1;
+      scaleRef.current = safeScale;
       canvasWRef.current = BASE_W;
       canvasHRef.current = BASE_H;
       canvas.width = BASE_W;
       canvas.height = BASE_H;
-      canvas.style.width = `${BASE_W * scale}px`;
-      canvas.style.height = `${BASE_H * scale}px`;
+      canvas.style.width = `${BASE_W * safeScale}px`;
+      canvas.style.height = `${BASE_H * safeScale}px`;
     };
 
     updateSize();
@@ -385,11 +390,16 @@ export const BreakoutGame = () => {
         </div>
       </div>
 
-      <div className="relative">
+      <div className="relative w-full" style={{ minWidth: `${BASE_W}px` }}>
         <canvas
           ref={canvasRef}
           className="rounded-xl border border-dark-border cursor-none"
-          style={{ touchAction: 'none', maxWidth: 'min(800px, 100%)' }}
+          style={{
+            touchAction: 'none',
+            maxWidth: 'min(800px, 100%)',
+            width: '100%',
+            height: 'auto',
+          }}
         />
 
         <AnimatePresence>

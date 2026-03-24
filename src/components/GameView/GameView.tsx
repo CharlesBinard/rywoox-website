@@ -50,14 +50,7 @@ const gameComponents: Record<GameId, React.LazyExoticComponent<React.ComponentTy
 };
 
 // Games that can be paused (real-time/action games)
-const PAUSABLE_GAMES: GameId[] = [
-  'snake',
-  'pong',
-  'flappy',
-  'tetris',
-  'breakout',
-  'numbermerge',
-];
+const PAUSABLE_GAMES: GameId[] = ['snake', 'pong', 'flappy', 'tetris', 'breakout', 'numbermerge'];
 
 const colorMap: Record<string, string> = {
   cyan: 'neon-cyan',
