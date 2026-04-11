@@ -1,3 +1,4 @@
+export { BreakoutGame } from './Breakout';
 export { ConnectFourGame } from './ConnectFour';
 export { FlappyGame } from './Flappy';
 export { MemoryGame } from './Memory';

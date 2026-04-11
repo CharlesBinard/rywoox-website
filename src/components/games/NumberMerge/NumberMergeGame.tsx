@@ -208,7 +208,11 @@ const getTileFontSize = (value: number): string => {
 
 const GAME_ID = 'numbermerge';
 
-export const NumberMergeGame = () => {
+interface NumberMergeGameProps {
+  paused?: boolean;
+}
+
+export const NumberMergeGame = ({ paused = false }: NumberMergeGameProps) => {
   const checkAchievements = useAchievementStore((s) => s.checkAchievements);
   const saveScore = useGameStore((s) => s.saveScore);
   const [grid, setGrid] = useState<Grid>(() => {
@@ -267,6 +271,7 @@ export const NumberMergeGame = () => {
 
   const handleMove = useCallback(
     (dir: Direction) => {
+      if (paused) return;
       if (isAnimating.current) return;
       if (gameOver && !keepPlaying) return;
 
@@ -304,7 +309,7 @@ export const NumberMergeGame = () => {
         }, 100);
       }, 150);
     },
-    [grid, gameOver, keepPlaying, won, score, buildTiles]
+    [grid, paused, gameOver, keepPlaying, won, score, buildTiles]
   );
 
   useEffect(() => {
@@ -331,6 +336,7 @@ export const NumberMergeGame = () => {
     const handleKey = (e: KeyboardEvent) => {
       if (keyMap[e.key]) {
         e.preventDefault();
+        if (paused) return;
         handleMove(keyMap[e.key]);
         if (!gameStarted) setGameStarted(true);
       }
@@ -338,7 +344,7 @@ export const NumberMergeGame = () => {
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [handleMove, gameStarted]);
+  }, [handleMove, paused, gameStarted]);
 
   // Touch controls
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -348,6 +354,10 @@ export const NumberMergeGame = () => {
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (!touchStartRef.current) return;
+    if (paused) {
+      touchStartRef.current = null;
+      return;
+    }
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStartRef.current.x;
     const dy = touch.clientY - touchStartRef.current.y;

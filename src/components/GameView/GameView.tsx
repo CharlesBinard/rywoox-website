@@ -7,7 +7,14 @@ import { BackButton } from '@/components/ui';
 import { GAMES } from '@/data/games';
 import type { GameId } from '@/types/games';
 
-const gameComponents: Record<GameId, React.LazyExoticComponent<React.ComponentType>> = {
+type GameComponentProps = {
+  paused?: boolean;
+};
+
+const gameComponents: Record<
+  GameId,
+  React.LazyExoticComponent<React.ComponentType<GameComponentProps>>
+> = {
   snake: lazy(() =>
     import('@/components/games/Snake/SnakeGame').then((m) => ({ default: m.SnakeGame }))
   ),
@@ -122,7 +129,7 @@ export const GameView = () => {
 
         <div className="relative">
           <Suspense fallback={<GameFallback />}>
-            <LazyGameComponent />
+            <LazyGameComponent paused={paused} />
           </Suspense>
 
           {/* Global pause overlay */}

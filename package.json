@@ -15,10 +15,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.52",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-router": "^1.168.2",
-    "ai": "^6.0.134",
     "framer-motion": "^12.38.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

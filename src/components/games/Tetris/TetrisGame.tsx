@@ -79,7 +79,11 @@ const rotate = (shape: number[][]): number[][] => {
   return out;
 };
 
-export const TetrisGame = () => {
+interface TetrisGameProps {
+  paused?: boolean;
+}
+
+export const TetrisGame = ({ paused: externalPaused = false }: TetrisGameProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const checkAchievements = useAchievementStore((s) => s.checkAchievements);
@@ -89,7 +93,8 @@ export const TetrisGame = () => {
   const [lines, setLines] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [started, setStarted] = useState(false);
-  const [paused, setPaused] = useState(false);
+  const [localPaused, setLocalPaused] = useState(false);
+  const paused = externalPaused || localPaused;
 
   const boardRef = useRef<number[][]>(Array.from({ length: ROWS }, () => Array(COLS).fill(-1)));
   const pieceRef = useRef<Piece | null>(null);
@@ -360,7 +365,7 @@ export const TetrisGame = () => {
     setScore(0);
     setLines(0);
     setGameOver(false);
-    setPaused(false);
+    setLocalPaused(false);
     setStarted(true);
     spawnPiece();
   }, [spawnPiece]);
@@ -415,7 +420,7 @@ export const TetrisGame = () => {
         case 'p':
         case 'P':
         case 'Escape':
-          setPaused((p) => !p);
+          setLocalPaused((p) => !p);
           break;
       }
     };
@@ -544,7 +549,7 @@ export const TetrisGame = () => {
             <div className="text-4xl mb-4">⏸️</div>
             <div className="text-xl font-bold text-gray-300 mb-6">PAUSE</div>
             <button
-              onClick={() => setPaused(false)}
+              onClick={() => setLocalPaused(false)}
               className="px-8 py-3 rounded-lg bg-neon-cyan/20 border border-neon-cyan text-neon-cyan font-bold hover:bg-neon-cyan/30 transition-all cursor-pointer"
             >
               REPRENDRE

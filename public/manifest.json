@@ -1,7 +1,7 @@
 {
   "name": "NeonDojo",
   "short_name": "NeonDojo",
-  "description": "6 Mini Games built with React & Canvas",
+  "description": "10 mini-jeux retro built with React & Canvas",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
