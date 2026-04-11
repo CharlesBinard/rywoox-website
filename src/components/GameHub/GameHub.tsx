@@ -63,7 +63,7 @@ export const GameHub = () => {
           </span>
         </button>
 
-        <p className="text-gray-600 text-sm font-mono">9 jeux · fait avec React & Canvas</p>
+        <p className="text-gray-600 text-sm font-mono">10 jeux · fait avec React & Canvas</p>
       </motion.div>
     </div>
   );

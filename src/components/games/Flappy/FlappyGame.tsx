@@ -20,7 +20,11 @@ type Pipe = { x: number; top: number; bottom: number; scored: boolean };
 
 const GAME_ID = 'flappy';
 
-export const FlappyGame = () => {
+interface FlappyGameProps {
+  paused?: boolean;
+}
+
+export const FlappyGame = ({ paused = false }: FlappyGameProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const checkAchievements = useAchievementStore((s) => s.checkAchievements);
   const saveScore = useGameStore((s) => s.saveScore);
@@ -54,6 +58,10 @@ export const FlappyGame = () => {
     reset();
     setCountdown(3);
     setGameState('countdown');
+  }, [reset]);
+
+  useEffect(() => {
+    if (paused || gameState !== 'countdown') return;
 
     if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
     countdownTimerRef.current = setInterval(() => {
@@ -67,9 +75,14 @@ export const FlappyGame = () => {
         return c - 1;
       });
     }, 1000);
-  }, [reset]);
+
+    return () => {
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+    };
+  }, [gameState, paused]);
 
   const jump = useCallback(() => {
+    if (paused) return;
     if (gameState === 'idle' || gameState === 'dead') {
       start();
       return;
@@ -83,7 +96,7 @@ export const FlappyGame = () => {
       return;
     }
     velRef.current = JUMP;
-  }, [gameState, start]);
+  }, [gameState, paused, start]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -104,7 +117,7 @@ export const FlappyGame = () => {
   }, []);
 
   useEffect(() => {
-    if (gameState !== 'playing' && gameState !== 'countdown') {
+    if (paused || (gameState !== 'playing' && gameState !== 'countdown')) {
       if (loopRef.current) cancelAnimationFrame(loopRef.current);
       return;
     }
@@ -232,7 +245,7 @@ export const FlappyGame = () => {
     return () => {
       if (loopRef.current) cancelAnimationFrame(loopRef.current);
     };
-  }, [gameState, score]);
+  }, [gameState, paused, score]);
 
   // Idle/dead render
   useEffect(() => {
@@ -270,12 +283,12 @@ export const FlappyGame = () => {
 
   // Music control based on game state
   useEffect(() => {
-    if (gameState === 'countdown' || gameState === 'playing') {
+    if (!paused && (gameState === 'countdown' || gameState === 'playing')) {
       startMusic();
     } else {
       pauseMusic();
     }
-  }, [gameState, startMusic, pauseMusic]);
+  }, [gameState, paused, startMusic, pauseMusic]);
 
   // Death sound
   useEffect(() => {

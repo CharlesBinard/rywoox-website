@@ -25,6 +25,12 @@ export type AchievementId =
   | 'numbermerge_2k1'
   | 'numbermerge_4k2'
   | 'numbermerge_8k4'
+  | 'minesweeper_first_clear'
+  | 'minesweeper_fast_clear'
+  | 'minesweeper_veteran'
+  | 'breakout_first_clear'
+  | 'breakout_brick_hunter'
+  | 'breakout_master'
   | 'global_explorer'
   | 'global_hardcore'
   | 'global_complete';
@@ -247,6 +253,58 @@ export const ALL_ACHIEVEMENTS: AchievementDefinition[] = [
     condition: (stats) => stats.highestTile !== undefined && stats.highestTile >= 8192,
   },
 
+  // Minesweeper
+  {
+    id: 'minesweeper_first_clear',
+    name: 'Démineur',
+    description: 'Termine une grille de Minesweeper',
+    emoji: '💣',
+    gameId: 'minesweeper',
+    condition: (stats) => stats.wins >= 1,
+  },
+  {
+    id: 'minesweeper_fast_clear',
+    name: 'Sang-Froid',
+    description: 'Termine une grille de Minesweeper en moins de 90 secondes',
+    emoji: '⏱️',
+    gameId: 'minesweeper',
+    condition: (stats) => stats.bestTime !== undefined && stats.bestTime < 90,
+  },
+  {
+    id: 'minesweeper_veteran',
+    name: 'Vétéran',
+    description: 'Termine 10 parties de Minesweeper',
+    emoji: '🧨',
+    gameId: 'minesweeper',
+    condition: (stats) => stats.gamesPlayed >= 10,
+  },
+
+  // Breakout
+  {
+    id: 'breakout_first_clear',
+    name: 'Casse-Briques',
+    description: 'Gagne une partie de Breakout',
+    emoji: '🧱',
+    gameId: 'breakout',
+    condition: (stats) => stats.wins >= 1,
+  },
+  {
+    id: 'breakout_brick_hunter',
+    name: 'Brick Hunter',
+    description: 'Atteins un score de 1000 à Breakout',
+    emoji: '🎯',
+    gameId: 'breakout',
+    condition: (stats) => stats.bestScore >= 1000,
+  },
+  {
+    id: 'breakout_master',
+    name: 'Mur Tombé',
+    description: 'Atteins un score de 2000 à Breakout',
+    emoji: '🏆',
+    gameId: 'breakout',
+    condition: (stats) => stats.bestScore >= 2000,
+  },
+
   // Global
   {
     id: 'global_explorer',
@@ -297,5 +355,7 @@ export const GAME_NAMES: Record<string, string> = {
   pong: 'Pong',
   tetris: 'Tetris',
   numbermerge: '2048',
+  minesweeper: 'Minesweeper',
+  breakout: 'Breakout',
   global: 'Global',
 };

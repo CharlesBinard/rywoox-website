@@ -24,6 +24,8 @@ const GAME_ORDER = [
   'pong',
   'tetris',
   'numbermerge',
+  'minesweeper',
+  'breakout',
   'global',
 ] as const;
 
