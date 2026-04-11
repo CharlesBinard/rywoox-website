@@ -1,5 +1,3 @@
-// TODO: integrate leaderboard
-
 export interface ScoreEntry {
   score: number;
   date: string;

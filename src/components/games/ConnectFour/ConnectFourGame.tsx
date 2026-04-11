@@ -1,9 +1,8 @@
-// TODO: integrate leaderboard
-
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAudio } from '@/hooks/useAudio';
 import { useAchievementStore } from '@/stores/achievementStore';
+import { useGameStore } from '@/stores/gameStore';
 
 type Player = 1 | 2;
 type Cell = Player | null;
@@ -108,6 +107,7 @@ const isBoardFull = (board: Board): boolean => board[0].every((cell) => cell !==
 
 export const ConnectFourGame = () => {
   const checkAchievements = useAchievementStore((s) => s.checkAchievements);
+  const saveScore = useGameStore((s) => s.saveScore);
   const { playSound, startMusic, pauseMusic } = useAudio();
   const [board, setBoard] = useState<Board>(createEmptyBoard);
   const [current, setCurrent] = useState<Player>(1);
@@ -210,12 +210,14 @@ export const ConnectFourGame = () => {
     if (winner && gameStarted && !achievementsCheckedRef.current) {
       achievementsCheckedRef.current = true;
       if (winner !== 'draw') {
+        saveScore(GAME_ID, 3);
         checkAchievements(GAME_ID, { wins: 1, gamesPlayed: 1 });
       } else {
+        saveScore(GAME_ID, 1);
         checkAchievements(GAME_ID, { gamesPlayed: 1 });
       }
     }
-  }, [winner, gameStarted, checkAchievements]);
+  }, [winner, gameStarted, saveScore, checkAchievements]);
 
   // Music control based on game state
   useEffect(() => {

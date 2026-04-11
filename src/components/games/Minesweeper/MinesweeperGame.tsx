@@ -12,6 +12,7 @@ import {
   revealCell,
   toggleFlag,
 } from '@/lib/gameLogic/minesweeper';
+import { useAchievementStore } from '@/stores/achievementStore';
 import { useGameStore } from '@/stores/gameStore';
 
 type GameState = 'ready' | 'playing' | 'won' | 'lost';
@@ -206,6 +207,7 @@ export const MinesweeperGame = () => {
   const [elapsed, setElapsed] = useState(0);
   const [showScores, setShowScores] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const checkAchievements = useAchievementStore((s) => s.checkAchievements);
   const saveScore = useGameStore((s) => s.saveScore);
 
   const flagCount = countFlags(board);
@@ -281,34 +283,24 @@ export const MinesweeperGame = () => {
       setBoard(newBoard);
 
       // Check if hit a mine
-      const cell =
-        gameState === 'ready'
-          ? (() => {
-              let attempts = 0;
-              let b: Board;
-              do {
-                b = createBoard(ROWS, COLS, MINE_COUNT);
-                attempts++;
-              } while (b[row][col].isMine && attempts < 100);
-              return b[row][col];
-            })()
-          : board[row][col];
+      const cell = newBoard[row][col];
 
       if (cell.isMine) {
         setBoard(revealAllMines(newBoard));
         setGameState('lost');
         saveScore(GAME_ID, elapsed);
+        checkAchievements(GAME_ID, { gamesPlayed: 1 });
         return;
       }
 
       // Check win
-      // Check win
       if (checkWin(newBoard)) {
         setGameState('won');
         saveScore(GAME_ID, elapsed);
+        checkAchievements(GAME_ID, { wins: 1, gamesPlayed: 1, bestTime: elapsed });
       }
     },
-    [board, gameState, elapsed, saveScore]
+    [board, gameState, elapsed, saveScore, checkAchievements]
   );
 
   const handleFlag = useCallback(

@@ -21,7 +21,11 @@ type GameState = 'idle' | 'playing' | 'scored' | 'gameover' | 'countdown';
 
 const BASE_PADDLE_Y = (BASE_H - PADDLE_H) / 2;
 
-export const PongGame = () => {
+interface PongGameProps {
+  paused?: boolean;
+}
+
+export const PongGame = ({ paused = false }: PongGameProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const checkAchievements = useAchievementStore((s) => s.checkAchievements);
   const { playSound, startMusic, pauseMusic } = useAudio();
@@ -92,6 +96,7 @@ export const PongGame = () => {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       keysRef.current.add(e.key);
+      if (paused) return;
       if (
         (e.key === ' ' || e.key === 'Enter') &&
         (gameState === 'idle' || gameState === 'countdown')
@@ -109,11 +114,11 @@ export const PongGame = () => {
       window.removeEventListener('keydown', handleKey);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState, startGame]);
+  }, [gameState, paused, startGame]);
 
   // Countdown timer effect
   useEffect(() => {
-    if (gameState !== 'countdown') return;
+    if (paused || gameState !== 'countdown') return;
 
     if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
     countdownTimerRef.current = setInterval(() => {
@@ -132,10 +137,10 @@ export const PongGame = () => {
     return () => {
       if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
     };
-  }, [gameState, launchBall]);
+  }, [gameState, paused, launchBall]);
 
   useEffect(() => {
-    if (gameState !== 'playing' && gameState !== 'countdown') return;
+    if (paused || (gameState !== 'playing' && gameState !== 'countdown')) return;
 
     const update = () => {
       const ball = ballRef.current;
@@ -326,7 +331,7 @@ export const PongGame = () => {
     return () => {
       if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
     };
-  }, [gameState, resetBall, playerScore, aiScore, playSound]);
+  }, [gameState, paused, resetBall, playerScore, aiScore, playSound]);
 
   // Check achievements on game over
   useEffect(() => {
@@ -341,12 +346,12 @@ export const PongGame = () => {
 
   // Music control based on game state
   useEffect(() => {
-    if (gameState === 'countdown' || gameState === 'playing') {
+    if (!paused && (gameState === 'countdown' || gameState === 'playing')) {
       startMusic();
-    } else if (gameState === 'gameover') {
+    } else if (paused || gameState === 'gameover') {
       pauseMusic();
     }
-  }, [gameState, startMusic, pauseMusic]);
+  }, [gameState, paused, startMusic, pauseMusic]);
 
   // Win/lose sound on game over
   useEffect(() => {

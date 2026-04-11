@@ -11,15 +11,16 @@
 
 | Jeu | Description |
 |-----|-------------|
+| 🎮 **Breakout** | Casse les briques avec la balle — garde tes vies |
 | 🎮 **Connect Four** | Classique jeu de Puissance 4 contre l'IA — aligne 4 pions pour gagner |
 | 🐦 **Flappy** | Bird qui évite les tuyaux — un classique infini |
 | 🧠 **Memory** | Retrouve les paires de cartes — entraîne ta mémoire |
+| 💣 **Minesweeper** | Trouve les mines sans exploser |
+| 🔢 **2048** | Combine les tuiles pour atteindre 2048 |
 | 🏓 **Pong** | Le jeu de ping-pong originel — 1v1 ou vs IA |
 | 🐍 **Snake** | Mange, grandis, évite de te mordre la queue |
 | 🧱 **Tetris** | Blocs qui tombent, lignes qui disparaissent — le grand classique |
 | ❌⭕ **TicTacToe** | Morpion au tour par tour — simple mais efficace |
-
-Chaque jeu intègre des features IA via **Gemini AI** (via `@ai-sdk/google`).
 
 ---
 
@@ -30,7 +31,6 @@ Chaque jeu intègre des features IA via **Gemini AI** (via `@ai-sdk/google`).
 - 🔀 **TanStack Router**
 - 🦾 **TypeScript**
 - ✨ **Framer Motion**
-- 🤖 **Gemini AI** (`@ai-sdk/google`)
 
 ---
 
@@ -43,7 +43,7 @@ bun install
 bun run dev
 ```
 
-> Le fichier `.env.production.example` contient les variables nécessaires pour la prod.
+> Le fichier `.env.production.example` est conservé pour documenter les variables de prod si besoin.
 
 ---
 
@@ -52,8 +52,6 @@ bun run dev
 ### Docker
 
 ```bash
-cp .env.production.example .env
-# Édite .env et ajoute ta clé API Gemini
 docker compose up -d
 ```
 

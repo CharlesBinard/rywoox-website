@@ -46,7 +46,9 @@ export type GameId =
   | 'flappy'
   | 'tictactoe'
   | 'connectfour'
-  | 'numbermerge';
+  | 'numbermerge'
+  | 'minesweeper'
+  | 'breakout';
 
 export interface Game {
   id: GameId;
