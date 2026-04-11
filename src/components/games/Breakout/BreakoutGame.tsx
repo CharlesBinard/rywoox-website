@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAudio } from '@/hooks/useAudio';
+import { useAchievementStore } from '@/stores/achievementStore';
 import { useGameStore } from '@/stores/gameStore';
 
 const BASE_W = 800;
@@ -52,8 +53,13 @@ const createBricksBase = (): Brick[] => {
   return bricks;
 };
 
-export const BreakoutGame = () => {
+interface BreakoutGameProps {
+  paused?: boolean;
+}
+
+export const BreakoutGame = ({ paused = false }: BreakoutGameProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const checkAchievements = useAchievementStore((s) => s.checkAchievements);
   const saveScore = useGameStore((s) => s.saveScore);
   const getBestScore = useGameStore((s) => s.getBestScore);
   const { playSound, startMusic, pauseMusic } = useAudio();
@@ -151,6 +157,7 @@ export const BreakoutGame = () => {
       mouseXRef.current = (e.touches[0].clientX - rect.left) * scaleX;
     };
     const handleClick = () => {
+      if (paused) return;
       if (gameState === 'playing') launchBall();
       if (gameState === 'idle' || gameState === 'gameover' || gameState === 'win') startGame();
     };
@@ -166,10 +173,10 @@ export const BreakoutGame = () => {
       window.removeEventListener('click', handleClick);
       window.removeEventListener('touchstart', handleClick);
     };
-  }, [gameState, launchBall, startGame]);
+  }, [gameState, paused, launchBall, startGame]);
 
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    if (paused || gameState !== 'playing') return;
 
     const PADDLE_Y = BASE_H - 40;
 
@@ -217,8 +224,9 @@ export const BreakoutGame = () => {
         setLives((l) => {
           const nl = l - 1;
           if (nl <= 0) {
-            setGameState('gameover');
             saveScore(GAME_ID, score);
+            checkAchievements(GAME_ID, { bestScore: score, gamesPlayed: 1 });
+            setGameState('gameover');
           } else {
             resetBall();
           }
@@ -270,6 +278,7 @@ export const BreakoutGame = () => {
             if (!anyAlive) {
               setGameState('win');
               saveScore(GAME_ID, ns);
+              checkAchievements(GAME_ID, { wins: 1, bestScore: ns, gamesPlayed: 1 });
             }
             return ns;
           });
@@ -355,16 +364,16 @@ export const BreakoutGame = () => {
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [gameState, resetBall, saveScore, score, playSound]);
+  }, [gameState, paused, resetBall, saveScore, checkAchievements, score, playSound]);
 
   // Music control based on game state
   useEffect(() => {
-    if (gameState === 'playing') {
+    if (gameState === 'playing' && !paused) {
       startMusic();
-    } else if (gameState === 'gameover' || gameState === 'win') {
+    } else if (paused || gameState === 'gameover' || gameState === 'win') {
       pauseMusic();
     }
-  }, [gameState, startMusic, pauseMusic]);
+  }, [gameState, paused, startMusic, pauseMusic]);
 
   // Win/lose sounds
   useEffect(() => {

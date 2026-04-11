@@ -26,3 +26,7 @@ dist-ssr
 
 # Biome
 .biome
+
+# Native crash dumps
+core
+core.*

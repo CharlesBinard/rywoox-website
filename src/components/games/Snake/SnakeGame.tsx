@@ -33,7 +33,11 @@ const getRandomFood = (snake: Position[]): Position => {
   return food;
 };
 
-export const SnakeGame = () => {
+interface SnakeGameProps {
+  paused?: boolean;
+}
+
+export const SnakeGame = ({ paused = false }: SnakeGameProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const checkAchievements = useAchievementStore((s) => s.checkAchievements);
   const saveScore = useGameStore((s) => s.saveScore);
@@ -139,7 +143,7 @@ export const SnakeGame = () => {
   }, []);
 
   useEffect(() => {
-    if (!isPlaying) {
+    if (!isPlaying || paused) {
       if (gameLoopRef.current) {
         clearInterval(gameLoopRef.current);
         gameLoopRef.current = null;
@@ -153,7 +157,7 @@ export const SnakeGame = () => {
     return () => {
       if (gameLoopRef.current) clearInterval(gameLoopRef.current);
     };
-  }, [isPlaying, moveSnake, score]);
+  }, [isPlaying, paused, moveSnake, score]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -278,6 +282,7 @@ export const SnakeGame = () => {
         e.preventDefault();
       }
 
+      if (paused) return;
       if (!isPlaying && e.key !== ' ' && e.key !== 'Enter') return;
       if (gameOver) return;
 
@@ -313,10 +318,10 @@ export const SnakeGame = () => {
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [isPlaying, gameOver]);
+  }, [isPlaying, paused, gameOver]);
 
   const handleDirBtn = (dir: Direction) => {
-    if (!isPlaying) return;
+    if (!isPlaying || paused) return;
     const opposites: Record<string, string> = {
       UP: 'DOWN',
       DOWN: 'UP',
@@ -338,12 +343,12 @@ export const SnakeGame = () => {
 
   // Music control based on isPlaying
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && !paused) {
       startMusic();
     } else {
       pauseMusic();
     }
-  }, [isPlaying, startMusic, pauseMusic]);
+  }, [isPlaying, paused, startMusic, pauseMusic]);
 
   // Game over sound
   useEffect(() => {

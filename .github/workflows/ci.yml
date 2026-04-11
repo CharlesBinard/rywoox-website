@@ -16,14 +16,14 @@ jobs:
         with:
           bun-version: latest
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-node_modules-
       - name: Cache bun cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .bun-cache
           key: ${{ runner.os }}-bun-cache-${{ hashFiles('bun.lock') }}
@@ -41,14 +41,14 @@ jobs:
         with:
           bun-version: latest
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-node_modules-
       - name: Cache bun cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .bun-cache
           key: ${{ runner.os }}-bun-cache-${{ hashFiles('bun.lock') }}
@@ -66,14 +66,14 @@ jobs:
         with:
           bun-version: latest
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-node_modules-
       - name: Cache bun cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .bun-cache
           key: ${{ runner.os }}-bun-cache-${{ hashFiles('bun.lock') }}
@@ -91,14 +91,14 @@ jobs:
         with:
           bun-version: latest
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-node_modules-
       - name: Cache bun cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .bun-cache
           key: ${{ runner.os }}-bun-cache-${{ hashFiles('bun.lock') }}
