@@ -10,11 +10,12 @@ const H = 600;
 const BIRD_X = 60;
 const BIRD_R = 10;
 const PIPE_W = 60;
-const PIPE_GAP = 160;
-const PIPE_SPEED = 2.5;
-const GRAVITY = 0.18;
-const JUMP = -7.0;
-const PIPE_SPAWN = 100;
+const PIPE_GAP = 190;
+const PIPE_SPEED = 2;
+const GRAVITY = 0.09;
+const JUMP = -4.8;
+const MAX_FALL_SPEED = 4.2;
+const PIPE_SPAWN = 130;
 
 type Pipe = { x: number; top: number; bottom: number; scored: boolean };
 
@@ -129,7 +130,7 @@ export const FlappyGame = ({ paused = false }: FlappyGameProps) => {
       if (gameState === 'countdown') return;
 
       // Bird physics
-      velRef.current += GRAVITY;
+      velRef.current = Math.min(MAX_FALL_SPEED, velRef.current + GRAVITY);
       birdYRef.current += velRef.current;
 
       // Ceiling/floor
