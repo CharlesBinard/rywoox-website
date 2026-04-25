@@ -36,7 +36,17 @@ export const useKeyboard = (options: UseKeyboardOptions): void => {
       if (!enabled) return;
       const dir = keyMap[e.key];
       if (dir) {
-        e.preventDefault();
+        // Only prevent default if we're not in an input/textarea
+        const target = e.target as HTMLElement;
+        const tagName = target.tagName.toLowerCase();
+        const isEditable =
+          tagName === 'input' ||
+          tagName === 'textarea' ||
+          tagName === 'select' ||
+          target.isContentEditable;
+        if (!isEditable) {
+          e.preventDefault();
+        }
         onMove(dir);
       }
     },

@@ -128,9 +128,9 @@ describe('moveGrid', () => {
       [0, 0, 0, 0],
     ]);
     const { grid: result } = moveGrid(grid, 'UP');
-    // With the implementation's rotation, UP moves tiles toward rows 2,3
-    expect(result[2][0]).toBe(2);
-    expect(result[3][0]).toBe(4);
+    // UP moves tiles toward the top (row 0)
+    expect(result[0][0]).toBe(2);
+    expect(result[1][0]).toBe(4);
   });
 
   it('moves down correctly', () => {
@@ -141,9 +141,9 @@ describe('moveGrid', () => {
       [0, 0, 0, 0],
     ]);
     const { grid: result } = moveGrid(grid, 'DOWN');
-    // With the implementation's rotation, DOWN moves tiles toward rows 0,1
-    expect(result[0][0]).toBe(2);
-    expect(result[1][0]).toBe(4);
+    // DOWN moves tiles toward the bottom (row 3)
+    expect(result[2][0]).toBe(2);
+    expect(result[3][0]).toBe(4);
   });
 
   it('adds score from merges', () => {

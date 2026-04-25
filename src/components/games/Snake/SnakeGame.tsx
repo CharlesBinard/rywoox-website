@@ -52,12 +52,15 @@ export const SnakeGame = ({ paused = false }: SnakeGameProps) => {
   const [gameStarted, setGameStarted] = useState(false);
   const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const directionRef = useRef<Direction>(direction);
+  // Tracks the last direction accepted by the key handler (sync, not async via useEffect)
+  const pendingDirRef = useRef<Direction>(direction);
   // Refs to avoid stale closure in game loop
   const scoreRef = useRef(0);
   const foodRef = useRef<Position>(food);
 
   useEffect(() => {
     directionRef.current = direction;
+    pendingDirRef.current = direction;
   }, [direction]);
 
   // Keep scoreRef in sync
@@ -78,6 +81,7 @@ export const SnakeGame = ({ paused = false }: SnakeGameProps) => {
     foodRef.current = newFood;
     setDirection('RIGHT');
     directionRef.current = 'RIGHT';
+    pendingDirRef.current = 'RIGHT';
     setScore(0);
     scoreRef.current = 0;
     setGameOver(false);
@@ -311,7 +315,8 @@ export const SnakeGame = ({ paused = false }: SnakeGameProps) => {
         RIGHT: 'LEFT',
       };
 
-      if (opposites[newDir] !== directionRef.current) {
+      if (opposites[newDir] !== pendingDirRef.current) {
+        pendingDirRef.current = newDir;
         setDirection(newDir);
       }
     };
@@ -328,7 +333,8 @@ export const SnakeGame = ({ paused = false }: SnakeGameProps) => {
       LEFT: 'RIGHT',
       RIGHT: 'LEFT',
     };
-    if (opposites[dir] !== directionRef.current) {
+    if (opposites[dir] !== pendingDirRef.current) {
+      pendingDirRef.current = dir;
       setDirection(dir);
     }
   };

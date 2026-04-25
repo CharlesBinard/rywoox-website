@@ -113,6 +113,7 @@ export const PongGame = ({ paused = false }: PongGameProps) => {
     return () => {
       window.removeEventListener('keydown', handleKey);
       window.removeEventListener('keyup', handleKeyUp);
+      keysRef.current.clear();
     };
   }, [gameState, paused, startGame]);
 
@@ -184,12 +185,18 @@ export const PongGame = ({ paused = false }: PongGameProps) => {
           vel.y = -Math.abs(vel.y);
         }
 
-        // Player paddle collision
-        if (ball.x - BALL_R <= PADDLE_W + 20 && ball.x > 20) {
+        // Player paddle collision — check overlap + ball moving toward paddle
+        const playerPaddleLeft = 20;
+        const playerPaddleRight = PADDLE_W + 20;
+        if (
+          vel.x < 0 &&
+          ball.x + BALL_R >= playerPaddleLeft &&
+          ball.x - BALL_R <= playerPaddleRight
+        ) {
           const paddleTop = playerPaddleRef.current;
           const paddleBottom = playerPaddleRef.current + PADDLE_H;
           if (ball.y >= paddleTop && ball.y <= paddleBottom) {
-            ball.x = PADDLE_W + 20 + BALL_R;
+            ball.x = playerPaddleRight + BALL_R;
             const hitPos = (ball.y - paddleTop) / PADDLE_H;
             vel.x = Math.abs(vel.x) * 1.05;
             vel.y = (hitPos - 0.5) * 10;
@@ -201,12 +208,14 @@ export const PongGame = ({ paused = false }: PongGameProps) => {
           }
         }
 
-        // AI paddle collision
-        if (ball.x + BALL_R >= BASE_W - PADDLE_W - 20 && ball.x < BASE_W - 20) {
+        // AI paddle collision — check overlap + ball moving toward paddle
+        const aiPaddleLeft = BASE_W - PADDLE_W - 20;
+        const aiPaddleRight = BASE_W - 20;
+        if (vel.x > 0 && ball.x + BALL_R >= aiPaddleLeft && ball.x - BALL_R <= aiPaddleRight) {
           const paddleTop = aiPaddleRef.current;
           const paddleBottom = aiPaddleRef.current + PADDLE_H;
           if (ball.y >= paddleTop && ball.y <= paddleBottom) {
-            ball.x = BASE_W - PADDLE_W - 20 - BALL_R;
+            ball.x = aiPaddleLeft - BALL_R;
             const hitPos = (ball.y - paddleTop) / PADDLE_H;
             vel.x = -Math.abs(vel.x) * 1.05;
             vel.y = (hitPos - 0.5) * 10;
@@ -379,7 +388,11 @@ export const PongGame = ({ paused = false }: PongGameProps) => {
         <canvas
           ref={canvasRef}
           className="rounded-xl border border-dark-border"
-          style={{ maxWidth: 'min(800px, 100%)', width: '100%', height: 'auto' }}
+          style={{
+            maxWidth: 'min(800px, 100%)',
+            width: '100%',
+            height: 'auto',
+          }}
         />
 
         {gameState === 'idle' && (

@@ -16,22 +16,34 @@ const gameComponents: Record<
   React.LazyExoticComponent<React.ComponentType<GameComponentProps>>
 > = {
   snake: lazy(() =>
-    import('@/components/games/Snake/SnakeGame').then((m) => ({ default: m.SnakeGame }))
+    import('@/components/games/Snake/SnakeGame').then((m) => ({
+      default: m.SnakeGame,
+    }))
   ),
   pong: lazy(() =>
-    import('@/components/games/Pong/PongGame').then((m) => ({ default: m.PongGame }))
+    import('@/components/games/Pong/PongGame').then((m) => ({
+      default: m.PongGame,
+    }))
   ),
   memory: lazy(() =>
-    import('@/components/games/Memory/MemoryGame').then((m) => ({ default: m.MemoryGame }))
+    import('@/components/games/Memory/MemoryGame').then((m) => ({
+      default: m.MemoryGame,
+    }))
   ),
   tetris: lazy(() =>
-    import('@/components/games/Tetris/TetrisGame').then((m) => ({ default: m.TetrisGame }))
+    import('@/components/games/Tetris/TetrisGame').then((m) => ({
+      default: m.TetrisGame,
+    }))
   ),
   flappy: lazy(() =>
-    import('@/components/games/Flappy/FlappyGame').then((m) => ({ default: m.FlappyGame }))
+    import('@/components/games/Flappy/FlappyGame').then((m) => ({
+      default: m.FlappyGame,
+    }))
   ),
   tictactoe: lazy(() =>
-    import('@/components/games/TicTacToe/TicTacToeGame').then((m) => ({ default: m.TicTacToeGame }))
+    import('@/components/games/TicTacToe/TicTacToeGame').then((m) => ({
+      default: m.TicTacToeGame,
+    }))
   ),
   connectfour: lazy(() =>
     import('@/components/games/ConnectFour/ConnectFourGame').then((m) => ({
@@ -59,9 +71,9 @@ const gameComponents: Record<
 const PAUSABLE_GAMES: GameId[] = ['snake', 'pong', 'flappy', 'tetris', 'breakout', 'numbermerge'];
 
 const colorMap: Record<string, string> = {
-  cyan: 'neon-cyan',
-  purple: 'neon-purple',
-  pink: 'neon-pink',
+  cyan: 'text-neon-cyan',
+  purple: 'text-neon-purple',
+  pink: 'text-neon-pink',
   green: 'text-green-400',
   yellow: 'text-yellow-400',
   orange: 'text-orange-400',
@@ -88,6 +100,12 @@ export const GameView = () => {
   const togglePause = useCallback(() => {
     if (canPause) setPaused((p) => !p);
   }, [canPause]);
+
+  // Reset paused state when switching games
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset paused when gameId changes
+  useEffect(() => {
+    setPaused(false);
+  }, [gameId]);
 
   // Keyboard shortcut: Escape or P to toggle pause
   useEffect(() => {
