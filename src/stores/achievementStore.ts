@@ -108,7 +108,15 @@ export const useAchievementStore = create<AchievementStore>()(
         const updatedStats: GameStats = {
           wins: prevStats.wins + (stats.wins ?? 0),
           bestScore: Math.max(prevStats.bestScore, stats.bestScore ?? prevStats.bestScore),
-          gamesPlayed: prevStats.gamesPlayed + (stats.gamesPlayed ?? 0),
+          gamesPlayed:
+            prevStats.gamesPlayed +
+            (stats.gamesPlayed ??
+              ((stats.wins ?? 0) > 0 ||
+              (stats.bestScore ?? 0) > 0 ||
+              (stats.bestTime ?? 0) > 0 ||
+              (stats.highestTile ?? 0) > 0
+                ? 1
+                : 0)),
           bestTime:
             stats.bestTime !== undefined
               ? stats.bestTime < (prevStats.bestTime ?? Infinity)
@@ -129,10 +137,10 @@ export const useAchievementStore = create<AchievementStore>()(
         }
 
         // Calculate total games played across all games
-        const totalGames = Object.values({ ...gameStats, [gameId]: updatedStats }).reduce(
-          (sum, s) => sum + (s?.gamesPlayed ?? 0),
-          0
-        );
+        const totalGames = Object.values({
+          ...gameStats,
+          [gameId]: updatedStats,
+        }).reduce((sum, s) => sum + (s?.gamesPlayed ?? 0), 0);
         updatedStats.totalGames = totalGames;
 
         // Compute global stats
